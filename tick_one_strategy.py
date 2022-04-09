@@ -1,4 +1,5 @@
 from datetime import datetime, time
+from pydoc import classname
 import numpy as np
 from vnpy_ctastrategy import (
     CtaTemplate,
@@ -62,6 +63,7 @@ class TickArrayManager(object):
 class TickOneStrategy(CtaTemplate):
     '''基于Tick的高频策略'''
     name = "TickOneStrategy"
+    class_name = "TickOneStrategy"
     author = "SongLinshuo"
   
     # 策略参数
@@ -81,9 +83,8 @@ class TickOneStrategy(CtaTemplate):
   
     # 参数列表，保存了参数的名称
     parameters = ['name',
-                 'className',
+                 'class_name',
                  'author',
-                 'vtSymbol',
                  'initDays',
                  'Ticksize',
                  'fixedSize'
