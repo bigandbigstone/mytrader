@@ -12,15 +12,15 @@ from vnpy_ctastrategy import (
 )
 
 class TickArrayManager(object):
-    """
-    Tick序列管理工具，负责：
+    '''
+    Tick序列管理工具, 负责:
     1. Tick时间序列的维护
     2. 常用技术指标的计算
-    """
+    '''
   
     # ----------------------------------------------------------------------
     def __init__(self, size=10):
-        """Constructor"""
+        '''TickArrayManager初始化'''
         self.count = 0  # 缓存计数
         self.size = size  # 缓存大小
         self.inited = False  # True if count>=size
@@ -34,8 +34,8 @@ class TickArrayManager(object):
         self.TickvolumeArray = np.zeros(self.size)
   
     # ----------------------------------------------------------------------
-    def updateTick(self, tick):
-        """更新tick Array"""
+    def updateTick(self, tick: TickData):
+        '''更新tick Array'''
         self.count += 1
         if not self.inited and self.count >= self.size:
             self.inited = True
@@ -48,20 +48,20 @@ class TickArrayManager(object):
         self.TickopenInterestArray[0:self.size - 1] = self.TickopenInterestArray[1:self.size]
         self.TickvolumeArray[0:self.size - 1] = self.TickvolumeArray[1:self.size]
   
-        self.TicklastPriceArray[-1] = tick.lastPrice
-        self.TickaskVolume1Array[-1] = tick.askVolume1
-        self.TickbidVolume1Array[-1] = tick.bidVolume1
-        self.TickaskPrice1Array[-1] = tick.askPrice1
-        self.TickbidPrice1Array[-1] = tick.bidPrice1
-        self.TickopenInterestArray[-1] = tick.openInterest
+        self.TicklastPriceArray[-1] = tick.last_price
+        self.TickaskVolume1Array[-1] = tick.ask_volume_1
+        self.TickbidVolume1Array[-1] = tick.bid_volume_1
+        self.TickaskPrice1Array[-1] = tick.ask_price_1
+        self.TickbidPrice1Array[-1] = tick.bid_price_1
+        self.TickopenInterestArray[-1] = tick.open_interest
         self.TickvolumeArray[-1] = tick.volume
   
     def askBidVolumeDif(self):
-        return (self.TickaskPrice1Array.sum() - self.TickbidVolume1Array.sum())
+        return (self.TickaskVolume1Array.sum() - self.TickbidVolume1Array.sum())
 
 class TickOneStrategy(CtaTemplate):
-    "基于Tick的交易策略"
-    author = "BillyZhang"
+    '''基于Tick的高频策略'''
+    author = "SongLinshuo"
   
     # 策略参数
     fixedSize = 1
@@ -79,7 +79,7 @@ class TickOneStrategy(CtaTemplate):
   
   
     # 参数列表，保存了参数的名称
-    paramList = ['name',
+    parameters = ['name',
                  'className',
                  'author',
                  'vtSymbol',
@@ -89,56 +89,54 @@ class TickOneStrategy(CtaTemplate):
                  ]
   
     # 变量列表，保存了变量的名称
-    varList = ['inited',
+    variables = ['inited',
                'trading',
                'pos',
                'posPrice'
                ]
   
     # 同步列表，保存了需要保存到数据库的变量名称
+    '''
     syncList = ['pos',
                 'posPrice',
                 'intraTradeHigh',
                 'intraTradeLow']
+    '''
   
     # ----------------------------------------------------------------------
-    def __init__(self, ctaEngine, setting):
-        """Constructor"""
-  
-        super(TickOneStrategy, self).__init__(ctaEngine, setting)
-  
+    def __init__(self, cta_engine, strategy_name, vt_symbol, setting):
+        """"""
+        super().__init__(cta_engine, strategy_name, vt_symbol, setting)
+
+        # self.bg = BarGenerator(self.on_bar, 15, self.on_15min_bar)
+        # self.am = ArrayManager()
         #创建Array队列
         self.tickArray = TickArrayManager(self.Ticksize)
+
+    # ----------------------------------------------------------------------
+    
+    def on_init(self):
+        '''初始化策略'''
+        self.write_log("策略初始化")
+        # tick级别交易，不需要过往历史数据
+        # self.load_bar(10)
+        self.put_event()
   
     # ----------------------------------------------------------------------
-    def onminBarClose(self, bar):
-        """"""
-  
-        # ----------------------------------------------------------------------
-  
-    def onInit(self):
-        """初始化策略（必须由用户继承实现）"""
-        self.writeCtaLog(u'%s策略初始化' % self.name)
-        #tick级别交易，不需要过往历史数据
-  
-  
-        self.putEvent()
-  
-    # ----------------------------------------------------------------------
-    def onStart(self):
-        """启动策略（必须由用户继承实现）"""
-        self.writeCtaLog(u'%s策略启动' % self.name)
-        self.putEvent()
+    def on_start(self):
+        '''启动策略'''
+        self.write_log("策略启动")
+        self.put_event()
   
     # ----------------------------------------------------------------------
     def onStop(self):
         """停止策略（必须由用户继承实现）"""
-        self.writeCtaLog(u'%s策略停止' % self.name)
-        self.putEvent()
+        self.write_log("策略停止")
+        self.put_event()
   
     # ----------------------------------------------------------------------
-    def onTick(self, tick):
-        """收到行情TICK推送（必须由用户继承实现）"""
+    def on_tick(self, tick: TickData):
+        '''收到行情TICK推送'''
         currentTime = datetime.now().time()
         # 平当日仓位, 如果当前时间是结束前日盘15点28分钟,或者夜盘10点58分钟，如果有持仓，平仓。
         if ((currentTime >= self.DAY_START and currentTime <= self.DAY_END) or
@@ -150,69 +148,64 @@ class TickOneStrategy(CtaTemplate):
             if self.pos == 0:
                 # 如果空仓，分析过去10个对比，ask卖方多下空单，bid买方多下多单，并防止两个差价阻止单
                 if TA.askBidVolumeDif() > 0:
-                    self.short(tick.lastPrice, self.fixedSize, False)
-                    self.cover(tick.lastPrice + 2,self.fixedSize, True)
+                    self.short(tick.last_price, self.fixedSize, False)
+                    self.cover(tick.last_price + 2,self.fixedSize, True)
                 elif TA.askBidVolumeDif() < 0:
-                    self.buy(tick.lastPrice, self.fixedSize, False)
-                    self.sell(tick.lastPrice - 2, self.fixedSize, True)
+                    self.buy(tick.last_price, self.fixedSize, False)
+                    self.sell(tick.last_price - 2, self.fixedSize, True)
   
             elif self.pos > 0:
                 # 如果持有多单，如果已经是买入价格正向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果持有，清掉之前阻止单，改挂当前价位反向2个点阻止单。
-                if  tick.lastprice - self.posPrice >= 3:
+                if  tick.last_price - self.posPrice >= 3:
                     if TA.askBidVolumeDif() < 0:
-                        self.cancelAll()
-                        self.sell(tick.lastPrice - 2, self.fixedSize, True)
+                        self.cancel_all()
+                        self.sell(tick.last_price - 2, self.fixedSize, True)
                     else:
-                        self.cancelAll()
-                        self.sell(tick.lastPrice, self.fixedSize, False)
+                        self.cancel_all()
+                        self.sell(tick.last_price, self.fixedSize, False)
   
             elif self.pos < 0:
                 # 如果持有空单，如果已经是买入价格反向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果持有，清掉之前阻止单，改挂当前价位反向2个点阻止单。
-                if  tick.lastPrice - self.posPrice <= -3:
+                if  tick.last_price - self.posPrice <= -3:
                     if TA.askBidVolumeDif() > 0:
-                        self.cancelAll()
-                        self.cover(tick.lastPrice + 2, self.fixedSize, True)
+                        self.cancel_all()
+                        self.cover(tick.last_price + 2, self.fixedSize, True)
                     else:
-                        self.cancelAll()
-                        self.cover(tick.lastPrice, self.fixedSize, False)
+                        self.cancel_all()
+                        self.cover(tick.last_price, self.fixedSize, False)
         else:
             if self.pos > 0:
-                self.sell(tick.close, abs(self.pos),False)
+                self.sell(tick.pre_close, abs(self.pos), False)
             elif self.pos < 0:
-                self.cover(tick.close, abs(self.pos),False)
+                self.cover(tick.pre_close, abs(self.pos), False)
             elif self.pos == 0:
                 return
   
-  
-  
-  
-  
     # ----------------------------------------------------------------------
-    def onBar(self, bar):
-        """收到Bar推送（必须由用户继承实现）"""
-  
-  
-    # ----------------------------------------------------------------------
-    def onXminBar(self, bar):
-        """收到X分钟K线"""
-  
-  
-  
-    # ----------------------------------------------------------------------
-    def onOrder(self, order):
-        """收到委托变化推送（必须由用户继承实现）"""
+    def on_bar(self, bar: BarData):
+        """
+        Callback of new bar data update.
+        """
         pass
   
     # ----------------------------------------------------------------------
-    def onTrade(self, trade):
-  
-        self.posPrice = trade.price
-        # 同步数据到数据库
-        self.saveSyncData()
-        # 发出状态更新事件
-        self.putEvent()
+    def on_order(self, order: OrderData):
+        """
+        Callback of new order data update.
+        """
+        pass
   
     # ----------------------------------------------------------------------
-    def onStopOrder(self, so):
-        """停止单推送"""
+    def on_trade(self, trade: TradeData):
+        """
+        Callback of new trade data update.
+        """
+        self.posPrice = trade.price
+        self.put_event()
+  
+    # ----------------------------------------------------------------------
+    def on_stop_order(self, stop_order: StopOrder):
+        """
+        Callback of stop order update.
+        """
         pass
