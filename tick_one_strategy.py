@@ -61,6 +61,7 @@ class TickArrayManager(object):
 
 class TickOneStrategy(CtaTemplate):
     '''基于Tick的高频策略'''
+    name = "TickOneStrategy"
     author = "SongLinshuo"
   
     # 策略参数
