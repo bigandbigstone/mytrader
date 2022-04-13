@@ -1,4 +1,5 @@
 import pymysql
+import pandas as pd
 
 class TickDataManager(object):
     def __init__(self):
@@ -48,9 +49,21 @@ class TickDataManager(object):
             isBuy INT)
         """
         cursor.execute(sql)
+    def csvinput(self):
+        data = pd.read_csv("E:\办公\毕设\DCi1809 - 副本.csv", sep = ",", parse_dates = ["Time"])
+        cursor = self.db.cursor()
+        row = data.loc[0]
+        # csv时间格式待解决
+        sql = """
+        INSERT INTO tickdata1(Time, Price, Volume, Amount, OpenInt)
+        VALUES (%s, %s, %s, %s, %s)
+        """
+        para = [row[0], row[1], row[2], row[3], row[4]]
+        cursor.execute(sql,para)
+
     def closedb(self):
         self.db.close()
 
 dbmanager = TickDataManager()
-dbmanager.createtable()
+dbmanager.csvinput()
 dbmanager.closedb()
