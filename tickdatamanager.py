@@ -3,11 +3,12 @@ import pandas as pd
 
 class TickDataManager(object):
     def __init__(self):
+        pass
+    def connectdb(self):
         self.db = pymysql.connect(host='localhost',
                      user='root',
                      password='songlinshuo',
                      database='traderdb')
-        pass
     def createtable(self):
         cursor = self.db.cursor()
         cursor.execute("DROP TABLE IF EXISTS tickdata1")
@@ -52,7 +53,7 @@ class TickDataManager(object):
     def csvinput(self):
         data = pd.read_csv("E:\办公\毕设\DCi1809 - 副本.csv", sep = ",", parse_dates = ["Time"])
         cursor = self.db.cursor()
-        for i in range(len(data)):
+        for i in range(1000):
             row = data.loc[i]
             sql = """
             INSERT INTO tickdata1(
@@ -114,6 +115,14 @@ class TickDataManager(object):
         self.db.close()
 
 dbmanager = TickDataManager()
+dbmanager.connectdb()
 dbmanager.createtable()
+dbmanager.closedb()
+
+dbmanager.connectdb()
+dbmanager.csvinput()
+dbmanager.closedb()
+
+dbmanager.connectdb()
 dbmanager.csvinput()
 dbmanager.closedb()
