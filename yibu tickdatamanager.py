@@ -1,20 +1,22 @@
-import pymysql
+import asyncio
+import aiomysql
+# import pymysql
 import pandas as pd
 
 class TickDataManager(object):
     def __init__(self):
         pass
 
-    def connectdb(self):
-        self.db = pymysql.connect(host='localhost',
+    async def connectdb(self):
+        self.db = await aiomysql.connect(host='localhost',
                      user='root',
                      password='songlinshuo',
                      database='traderdb')
 
-    def createtable(self):
-        self.connectdb()
-        cursor = self.db.cursor()
-        cursor.execute("DROP TABLE IF EXISTS tickdata1")
+    async def createtable(self):
+        await self.connectdb()
+        cursor = await self.db.cursor()
+        await cursor.execute("DROP TABLE IF EXISTS tickdata1")
         sql = """
         CREATE TABLE tickdata1 (
             Time DATETIME,
@@ -52,15 +54,15 @@ class TickDataManager(object):
             BV5 INT,
             isBuy INT)
         """
-        cursor.execute(sql)
+        await cursor.execute(sql)
         cursor.close()
         self.closedb()
 
-    def csvinput(self, start: int):
+    async def csvinput(self, start: int):
         data = pd.read_csv("E:\办公\毕设\DCi1809 - 副本.csv", sep = ",", parse_dates = ["Time"])
         n = len(data)
-        self.connectdb()
-        cursor = self.db.cursor()
+        await self.connectdb()
+        cursor = await self.db.cursor()
         for i in range(start, n):
             print(i)
             row = data.loc[i]
@@ -113,17 +115,17 @@ class TickDataManager(object):
             para = list(row)
             try:
                 # 执行sql语句
-                cursor.execute(sql, para)
-                self.db.commit()
+                await cursor.execute(sql, para)
+                await self.db.commit()
             except:
                 # 发生错误时回滚
-                self.db.rollback()
-        cursor.close()
-        self.closedb()
+                await self.db.rollback()
+        await cursor.close()
+        await self.closedb()
 
-    def closedb(self):
-        self.db.close()
+    async def closedb(self):
+        await self.db.close()
 
 dbmanager = TickDataManager()
-dbmanager.createtable()
-dbmanager.csvinput(0)
+asyncio.run(dbmanager.createtable())
+asyncio.run(dbmanager.csvinput(0))
