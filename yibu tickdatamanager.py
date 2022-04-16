@@ -16,7 +16,7 @@ class TickDataManager(object):
     async def createtable(self):
         await self.connectdb()
         cursor = await self.db.cursor()
-        await cursor.execute("DROP TABLE IF EXISTS tickdata1")
+        await cursor.execute("DROP TABLE IF EXISTS tickdata2")
         sql = """
         CREATE TABLE tickdata1 (
             Time DATETIME,
@@ -67,7 +67,7 @@ class TickDataManager(object):
             print(i)
             row = data.loc[i]
             sql = """
-            INSERT INTO tickdata1(
+            INSERT INTO tickdata2(
                 Time,
                 Price,
                 Volume,
