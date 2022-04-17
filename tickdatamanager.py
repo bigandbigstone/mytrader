@@ -1,3 +1,4 @@
+import datetime
 import pymysql
 import pandas as pd
 
@@ -14,9 +15,9 @@ class TickDataManager(object):
     def createtable(self):
         self.connectdb()
         cursor = self.db.cursor()
-        cursor.execute("DROP TABLE IF EXISTS tickdata1")
+        cursor.execute("DROP TABLE IF EXISTS tickdata3")
         sql = """
-        CREATE TABLE tickdata1 (
+        CREATE TABLE tickdata3 (
             Time DATETIME,
             Price FLOAT,
             Volume INT,
@@ -65,7 +66,7 @@ class TickDataManager(object):
             print(i)
             row = data.loc[i]
             sql = """
-            INSERT INTO tickdata1(
+            INSERT INTO tickdata3(
                 Time,
                 Price,
                 Volume,
@@ -114,10 +115,10 @@ class TickDataManager(object):
             try:
                 # 执行sql语句
                 cursor.execute(sql, para)
-                self.db.commit()
             except:
                 # 发生错误时回滚
                 self.db.rollback()
+        self.db.commit()
         cursor.close()
         self.closedb()
 
@@ -125,5 +126,8 @@ class TickDataManager(object):
         self.db.close()
 
 dbmanager = TickDataManager()
+start = datetime.datetime.now()
 dbmanager.createtable()
 dbmanager.csvinput(0)
+end = datetime.datetime.now()
+print(end - start)

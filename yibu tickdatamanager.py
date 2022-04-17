@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import aiomysql
 # import pymysql
 import pandas as pd
@@ -11,14 +12,14 @@ class TickDataManager(object):
         self.db = await aiomysql.connect(host='localhost',
                      user='root',
                      password='songlinshuo',
-                     database='traderdb')
+                     db='traderdb')
 
     async def createtable(self):
         await self.connectdb()
         cursor = await self.db.cursor()
         await cursor.execute("DROP TABLE IF EXISTS tickdata2")
         sql = """
-        CREATE TABLE tickdata1 (
+        CREATE TABLE tickdata2 (
             Time DATETIME,
             Price FLOAT,
             Volume INT,
@@ -55,8 +56,8 @@ class TickDataManager(object):
             isBuy INT)
         """
         await cursor.execute(sql)
-        cursor.close()
-        self.closedb()
+        await cursor.close()
+        await self.closedb()
 
     async def csvinput(self, start: int):
         data = pd.read_csv("E:\办公\毕设\DCi1809 - 副本.csv", sep = ",", parse_dates = ["Time"])
@@ -116,16 +117,20 @@ class TickDataManager(object):
             try:
                 # 执行sql语句
                 await cursor.execute(sql, para)
-                await self.db.commit()
             except:
                 # 发生错误时回滚
                 await self.db.rollback()
+        await self.db.commit()
         await cursor.close()
         await self.closedb()
 
     async def closedb(self):
-        await self.db.close()
+        self.db.close()
+
 
 dbmanager = TickDataManager()
+start = datetime.datetime.now()
 asyncio.run(dbmanager.createtable())
 asyncio.run(dbmanager.csvinput(0))
+end = datetime.datetime.now()
+print(end - start)
