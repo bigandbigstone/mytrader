@@ -1,4 +1,5 @@
 import datetime
+from unittest import result
 import pymysql
 import pandas as pd
 
@@ -15,9 +16,9 @@ class TickDataManager(object):
     def createtable(self):
         self.connectdb()
         cursor = self.db.cursor()
-        cursor.execute("DROP TABLE IF EXISTS tickdata3")
+        cursor.execute("DROP TABLE IF EXISTS tickdata1")
         sql = """
-        CREATE TABLE tickdata3 (
+        CREATE TABLE tickdata1 (
             Time DATETIME,
             Price FLOAT,
             Volume INT,
@@ -66,7 +67,7 @@ class TickDataManager(object):
             print(i)
             row = data.loc[i]
             sql = """
-            INSERT INTO tickdata3(
+            INSERT INTO tickdata1(
                 Time,
                 Price,
                 Volume,
@@ -122,12 +123,43 @@ class TickDataManager(object):
         cursor.close()
         self.closedb()
 
+    def getdatabyorder(self):
+        # bp1-5,sp1-5,bv1-5,sv1-5
+        self.connectdb()
+        cursor = self.db.cursor()
+        sql = """
+            SELECT
+                BP1,
+                BP2,
+                BP3,
+                BP4,
+                BP5,
+                SP1,
+                SP2,
+                SP3,
+                SP4,
+                SP5,
+                BV1,
+                BV2,
+                BV3,
+                BV4,
+                BV5,
+                SV1,
+                SV2,
+                SV3,
+                SV4,
+                SV5
+            FROM tickdata1
+            """
+        cursor.execute(sql)
+        results = cursor.fetchall()
+        cursor.close()
+        self.closedb()
+        return results
+
     def closedb(self):
         self.db.close()
 
-dbmanager = TickDataManager()
-start = datetime.datetime.now()
-dbmanager.createtable()
-dbmanager.csvinput(0)
-end = datetime.datetime.now()
-print(end - start)
+# test code
+'''dbmanager = TickDataManager()
+print(dbmanager.getdatabyorder())'''

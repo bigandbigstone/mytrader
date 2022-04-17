@@ -127,10 +127,10 @@ class TickDataManager(object):
     async def closedb(self):
         self.db.close()
 
-
-dbmanager = TickDataManager()
+# test code
+'''dbmanager = TickDataManager()
 start = datetime.datetime.now()
 asyncio.run(dbmanager.createtable())
 asyncio.run(dbmanager.csvinput(0))
 end = datetime.datetime.now()
-print(end - start)
+print(end - start)'''
