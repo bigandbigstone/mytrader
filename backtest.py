@@ -6,6 +6,7 @@ class BackTestManager(object):
         dbmanager = tdm.TickDataManager()
         ticks = dbmanager.getdatabyorder()
         n = len(ticks)
+        n = 2
         pretick = ticks[0]
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)
@@ -52,14 +53,28 @@ class BackTestManager(object):
                 self.orderoutput("买入", price, vol)
                 # 疑点2: vol为负数时如何处理？
             
-            # 其余价位尚未实现
+            # 更新非最优价买卖量
             for j in range(1,5):
                 # nowtick里其他买入价格
-                pass
+                price, vol = nowtick[j], nowtick[j + 10]
+                prevol = 0
+                if price in buydic:
+                    prevol = buydic[price]
+                if vol > prevol:
+                    self.orderoutput("买入", price, vol - prevol)
+                elif prevol > vol:
+                    self.orderoutput("取消", price, prevol - vol)
             
             for j in range(6,10):
                 # nowtick里其他卖出价格
-                pass
+                price, vol = nowtick[j], nowtick[j + 10]
+                prevol = 0
+                if price in selldic:
+                    prevol = selldic[price]
+                if vol > prevol:
+                    self.orderoutput("卖出", price, vol - prevol)
+                elif prevol > vol:
+                    self.orderoutput("取消", price, prevol - vol)
 
             pretick = nowtick
             buydic = self.tobuydic(pretick)
@@ -69,11 +84,16 @@ class BackTestManager(object):
         dic = dict()
         for i in range(5):
             dic[tick[i]] = tick[i + 10]
+        return dic
     
     def toselldic(self, tick: list) -> dict:
         dic = dict()
         for i in range(5, 10):
             dic[tick[i]] = tick[i + 10]
+        return dic
 
     def orderoutput(self, type: str, price: float, vol: int):
         print(type + str(price) + ' ' + str(vol))
+
+backtest = BackTestManager()
+backtest.outputordersbyticks()
