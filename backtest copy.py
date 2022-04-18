@@ -60,6 +60,7 @@ class BackTestManager(object):
                         vol += pretick[j]
                     elif pretick[j - 10] == price:
                         # 此处差值为负如何处理？是否应当独立说明，剩下负的再自己加上去吧，乐
+                        # 果然出问题了
                         vol += (pretick[j] - nowtick[j])
                     else:
                         break
