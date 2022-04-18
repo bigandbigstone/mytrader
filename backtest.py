@@ -7,6 +7,8 @@ class BackTestManager(object):
         ticks = dbmanager.getdatabyorder()
         n = len(ticks)
         pretick = ticks[0]
+        buydic = self.tobuydic(pretick)
+        selldic = self.toselldic(pretick)
         for i in range(1, n):
             nowtick = ticks[i]
             if nowtick[0] < pretick[0] or nowtick[10] < pretick[10]:
@@ -51,8 +53,27 @@ class BackTestManager(object):
                 # 疑点2: vol为负数时如何处理？
             
             # 其余价位尚未实现
+            for j in range(1,5):
+                # nowtick里其他买入价格
+                pass
+            
+            for j in range(6,10):
+                # nowtick里其他卖出价格
+                pass
 
             pretick = nowtick
+            buydic = self.tobuydic(pretick)
+            selldic = self.toselldic(pretick)
     
+    def tobuydic(self, tick: list) -> dict:
+        dic = dict()
+        for i in range(5):
+            dic[tick[i]] = tick[i + 10]
+    
+    def toselldic(self, tick: list) -> dict:
+        dic = dict()
+        for i in range(5, 10):
+            dic[tick[i]] = tick[i + 10]
+
     def orderoutput(self, type: str, price: float, vol: int):
         print(type + str(price) + ' ' + str(vol))
