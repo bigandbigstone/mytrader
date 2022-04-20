@@ -1,4 +1,5 @@
 from datetime import datetime, time
+from turtle import pos
 import numpy as np
 
 class TickArrayManager(object):
@@ -43,6 +44,10 @@ class TickOneStrategy(object):
     fixedSize = 1
     Ticksize = 10
     initDays = 0
+
+    pos = 0
+    posPrice = 0
+    # 上一成交价格，这个咋整？
   
     DAY_START = time(9, 00)  # 日盘启动和停止时间
     DAY_END = time(14, 58)
@@ -102,18 +107,38 @@ class TickOneStrategy(object):
                 self.cover(tick[21], abs(self.pos), False)
             elif self.pos == 0:
                 return
-
-    def sell():
+    
+    # 未实现
+    def on_trade(self, price: float):
+        """
+        Callback of new trade data update.
+        """
+        # self.posPrice = price
         pass
 
     def buy():
+        # 买多
+        # 记的得pos += size
+        pass
+
+    def sell():
+        # 卖多
+        # 记的得pos -= size
         pass
 
     def short():
+        # 卖空
+        # 记的得pos -= size
         pass
 
     def cover():
+        # 买空
+        # 记的得pos += size
         pass
     
     def cancel_all():
         pass
+
+    '''def orderslist():
+        # 维持订单队列，写在这或者回测里
+        pass'''
