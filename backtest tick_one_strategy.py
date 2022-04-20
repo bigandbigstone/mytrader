@@ -68,7 +68,7 @@ class TickOneStrategy(object):
             if not TA.inited:
                 return
             if self.pos == 0:
-                # 如果空仓，分析过去10个对比，ask卖方多下空单，bid买方多下多单，并防止两个差价阻止单
+                # 如果空仓，分析过去10个对比，ask买方多下空单，bid卖方多下多单，并防止两个差价阻止单
                 if TA.askBidVolumeDif() > 0:
                     self.short(tick[20], self.fixedSize, False)
                     self.cover(tick[20] + 2,self.fixedSize, True)
