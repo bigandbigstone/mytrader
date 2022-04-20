@@ -37,14 +37,10 @@ class BackTestManager(object):
                     if pretick[j] > nowtick[0]:
                         # 疑点1：是买一价还是卖一价
                         price = pretick[j]
+                        vol = pretick[j + 10]
+                        self.orderoutput("撮合", "买单", price, vol)
                     else:
                         break
-                for j in range(10,15):
-                    if pretick[j - 10] >= price:
-                        vol += pretick[j]
-                    else:
-                        break
-                self.orderoutput("撮合", "买单", price, vol)
                 # 对当前买一价的处理
                 price = nowtick[0]
                 vol = nowtick[10]
@@ -94,14 +90,10 @@ class BackTestManager(object):
                 for j in range(5, 10):
                     if pretick[j] < nowtick[5]:
                         price = pretick[j]
+                        vol = pretick[j + 10]
+                        self.orderoutput("撮合", "卖单", price, vol)
                     else:
                         break
-                for j in range(15, 20):
-                    if pretick[j - 10] <= price:
-                        vol += pretick[j]
-                    else:
-                        break
-                self.orderoutput("撮合", "卖单", price, vol)
                 # 对当前卖一价的处理
                 price = nowtick[5]
                 vol = nowtick[15]
