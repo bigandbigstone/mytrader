@@ -148,9 +148,14 @@ class TickDataManager(object):
                 SV2,
                 SV3,
                 SV4,
-                SV5
+                SV5,
+                Price,
+                LastClose
             FROM tickdata1
             """
+            # len(tick) = 22
+            # Price最后成交价
+            # LastClose昨日收盘价
         cursor.execute(sql)
         results = cursor.fetchall()
         cursor.close()

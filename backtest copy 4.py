@@ -4,18 +4,17 @@ class BackTestManager(object):
     # 即历史订单尾+新增或取消的订单修正（乘0.5加在历史订单尾）（与策略订单同周期的）
     # 下一tick级进行撮合判断，在撮合范围则订单成交，非撮合范围则降低策略订单到成交面的高度，降低的距离为撮合量（成交）
     def __init__(self):
+        self.dbmanager = tdm.TickDataManager()
+        self.ticks = self.dbmanager.getdatabyorder()
         pass
     def outputordersbyticks(self):
-        dbmanager = tdm.TickDataManager()
-        ticks = dbmanager.getdatabyorder()
-        n = len(ticks)
+        n = len(self.ticks)
         n = 30
-        pretick = ticks[0]
+        pretick = self.ticks[0]
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)
         for i in range(1, n):
-            nowtick = ticks[i]
-            
+            nowtick = self.ticks[i]
             # 对买一价的处理
             if nowtick[0] == pretick[0]:
                 # 买一价未发送变化
