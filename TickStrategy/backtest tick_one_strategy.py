@@ -1,3 +1,4 @@
+# TickOneStrategy for BackTest
 from datetime import datetime, time
 from turtle import pos
 from BackTestTemplate import BackTestTemplate
@@ -45,10 +46,6 @@ class TickOneStrategy(BackTestTemplate):
     fixedSize = 1
     Ticksize = 10
     initDays = 0
-
-    pos = 0
-    posPrice = 0
-    # 上一成交价格，这个咋整？
   
     DAY_START = time(9, 00)  # 日盘启动和停止时间
     DAY_END = time(14, 58)

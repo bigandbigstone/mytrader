@@ -1,4 +1,4 @@
-import tickdatamanager as tdm
+import TickDataManager.tickdatamanager as tdm
 class BackTestManager(object):
     def __init__(self):
         pass
@@ -50,28 +50,21 @@ class BackTestManager(object):
                 # 买一价减小
                 price, vol = 0.0, 0
                 for j in range(5):
-                    if pretick[j] > nowtick[0]:
+                    if pretick[j] >= nowtick[0]:
                         # 疑点1：是买一价还是卖一价
                         price = pretick[j]
                     else:
                         break
                 for j in range(10,15):
-                    if pretick[j - 10] >= price:
+                    if pretick[j - 10] > price:
                         vol += pretick[j]
+                    elif pretick[j - 10] == price:
+                        # 此处差值为负如何处理？是否应当独立说明，剩下负的再自己加上去吧，乐
+                        # 果然出问题了
+                        vol += (pretick[j] - nowtick[j])
                     else:
                         break
                 self.orderoutput("卖出", price, vol)
-                # 对当前买一价的处理
-                price = nowtick[0]
-                vol = nowtick[10]
-                if price in buydic:
-                    prevol = buydic[price]
-                    if prevol > vol:
-                        self.orderoutput("卖出", price, prevol - vol)
-                    elif prevol < vol:
-                        self.orderoutput("挂买", price, vol - prevol)
-                else:
-                    self.orderoutput("挂买", price, vol)
             else:
                 # 买一价增大
                 price, vol = 0.0, 0
@@ -128,27 +121,19 @@ class BackTestManager(object):
                 # 卖一价增大
                 price, vol = 0.0, 0
                 for j in range(5, 10):
-                    if pretick[j] < nowtick[5]:
+                    if pretick[j] <= nowtick[5]:
                         price = pretick[j]
                     else:
                         break
                 for j in range(15, 20):
-                    if pretick[j - 10] <= price:
+                    if pretick[j - 10] < price:
                         vol += pretick[j]
+                    elif pretick[j - 10] == price:
+                        # 此处差值为负如何处理？
+                        vol += (pretick[j] - nowtick[j])
                     else:
                         break
                 self.orderoutput("买入", price, vol)
-                # 对当前卖一价的处理
-                price = nowtick[5]
-                vol = nowtick[15]
-                if price in selldic:
-                    prevol = selldic[price]
-                    if prevol > vol:
-                        self.orderoutput("买入", price, prevol - vol)
-                    elif prevol < vol:
-                        self.orderoutput("挂卖", price, vol - prevol)
-                else:
-                    self.orderoutput("挂卖", price, vol)
             else:
                 # 卖一价减小
                 price, vol = 0.0, 0

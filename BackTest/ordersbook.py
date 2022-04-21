@@ -1,5 +1,5 @@
 from collections import deque
-import tickdatamanager as tdm
+import TickDataManager.tickdatamanager as tdm
 class OrdersBook(object):
     def __init__(self, tick: list):
         self.buydq, self.selldq = deque(), deque()

@@ -1,4 +1,5 @@
-import tickdatamanager as tdm
+# 未实现，最新版本见copy4
+import TickDataManager.tickdatamanager as tdm
 class BackTestManager(object):
     def __init__(self):
         pass
