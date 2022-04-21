@@ -1,5 +1,6 @@
 from datetime import datetime, time
 from turtle import pos
+from BackTestTemplate import BackTestTemplate
 import numpy as np
 
 class TickArrayManager(object):
@@ -34,7 +35,7 @@ class TickArrayManager(object):
     def askBidVolumeDif(self):
         return (self.TickaskVolume1Array.sum() - self.TickbidVolume1Array.sum())
 
-class TickOneStrategy(object):
+class TickOneStrategy(BackTestTemplate):
     '''基于Tick的高频策略'''
     name = "TickOneStrategy"
     class_name = "TickOneStrategy"
@@ -107,38 +108,3 @@ class TickOneStrategy(object):
                 self.cover(tick[21], abs(self.pos), False)
             elif self.pos == 0:
                 return
-    
-    # 未实现
-    def on_trade(self, price: float):
-        """
-        Callback of new trade data update.
-        """
-        # self.posPrice = price
-        pass
-
-    def buy():
-        # 买多
-        # 记的得pos += size
-        pass
-
-    def sell():
-        # 卖多
-        # 记的得pos -= size
-        pass
-
-    def short():
-        # 卖空
-        # 记的得pos -= size
-        pass
-
-    def cover():
-        # 买空
-        # 记的得pos += size
-        pass
-    
-    def cancel_all():
-        pass
-
-    '''def orderslist():
-        # 维持订单队列，写在这或者回测里
-        pass'''
