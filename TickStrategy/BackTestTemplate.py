@@ -3,9 +3,7 @@ from vnpy.trader.constant import Direction, Offset
 
 
 class BackTestTemplate(object):
-
     
-
     pos = 0
     # 持仓和持仓价格
     posPrice = 0
