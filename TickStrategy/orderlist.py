@@ -4,7 +4,13 @@ import pymysql
 
 class OrderList(object):
     def __init__(self):
+        # 用于存储每轮tick的订单新增调整值，买单为正，卖单为负
+        self.orderdic = dict()
         pass
+    
+    # 每轮tick需要调用一次清空
+    def orderaddclear(self):
+        self.orderdic.clear()
 
     def connectdb(self):
         self.db = pymysql.connect(host='localhost',
@@ -24,6 +30,7 @@ class OrderList(object):
         # 成交订单回取消订单，降低高度，降低高度到0全部成交
         sql = """
         CREATE TABLE limitlist (
+            LID INT PRIMARY KEY AUTO_INCREMENT,
             Type INT,
             Price FLOAT,
             Volume INT,
@@ -35,6 +42,7 @@ class OrderList(object):
         # 停止单中没有高低，按市价单成交方式成交
         sql = """
         CREATE TABLE stoplist (
+            SID INT PRIMARY KEY AUTO_INCREMENT,
             Type INT,
             Price FLOAT,
             Volume INT)
@@ -44,10 +52,13 @@ class OrderList(object):
         cursor.close()
         self.closedb()
         
-    def addorder(self, offset: str, type: str, price: float, volume: int, stop: bool):
+    def addorder(self, offset: str, type: int, price: float, volume: int, stop: bool):
         # 向策略订单队列中增加订单，包括限价订单和停止单
         # type 0为买单，1为卖单
-        height = 0.0
+        if type == 0:
+            height = self.orderdic.get(price, 10)
+        else:
+            height = self.orderdic.get(-1 * price, 10)
         # 未实现: 应还有当前tick到下一tick的新增订单指令，当限价订单价格在其中时要增加高度修正
         self.connectdb()
         cursor = self.db.cursor()
@@ -91,13 +102,57 @@ class OrderList(object):
         cursor.close()
         self.closedb()
 
-    def orderfinishedornot(self):
-        # 要接入模拟交易指令
+    def orderinput(self,action: str, type: str, price: float, vol: int):
+        # 要接入模拟交易指令，主要是针对的限价订单
         # 新增订单用于订单创建时的高度修正
         # 订单取消，高度降低
         # 订单撮合，高度降低
         # 高度降低到0，即为成交
-        pass
+        if action == "新增":
+            if type == "买单":
+                self.orderdic[price] = vol
+            else:
+                self.orderdic[-1 * price] = vol
+        elif action == "撮合" or action == "取消":
+            self.connectdb()
+            cursor = self.db.cursor()
+
+            sql = '''
+            SELECT LID, Height FROM limitlist
+                WHERE Type = %s AND Price = %s
+            '''
+            if type == "买单":
+                cursor.execute(sql, [0, price])
+            else:
+                cursor.execute(sql, [1, price])
+
+            orders = cursor.fetchall()
+            for order in orders:
+                LID, Height = order[0], order[1]
+                Height -= vol
+                if Height > 0:
+                    # 更新高度
+                    sql = '''
+                    UPDATE limitlist SET Height = %s WHERE LID = %s
+                    '''
+                    try:
+                        cursor.execute(sql,[Height, LID])
+                    except:
+                        self.db.rollback()
+                else:
+                    sql = '''
+                    DELETE FROM limitlist
+                    WHERE LID = %s
+                    '''
+                    try:
+                        cursor.execute(sql, LID)
+                        # 成交部分实现
+                    except:
+                        self.db.rollback()
+
+            self.db.commit()
+            cursor.close()
+            self.closedb()
 
     def delall(self):
         # 清空未成交订单包括限价和停止单
@@ -110,3 +165,5 @@ class OrderList(object):
 
         cursor.close()
         self.closedb()
+
+olist = OrderList()
