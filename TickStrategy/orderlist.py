@@ -1,7 +1,7 @@
 # 未实现
 from pygments import highlight
 import pymysql
-
+# 完全实现，OK！
 class OrderList(object):
     pos = 0
     capital = 0
@@ -55,13 +55,13 @@ class OrderList(object):
         cursor.close()
         self.closedb()
         
-    def addorder(self, offset: str, type: int, price: float, volume: int, stop: bool):
-        # 向策略订单队列中增加订单，包括限价订单和停止单
+    def addorder(self, offset: str, type: int, price: float, volume: int, stop: bool, preheight: float):
+        # 向策略订单队列中增加订单，包括限价订单和停止单，preheight为当前tick（或pretick）的历史积累订单高度
         # type 0为买单，1为卖单
         if type == 0:
-            height = self.orderdic.get(price, 10)
+            height = self.orderdic.get(price, 10) + preheight
         else:
-            height = self.orderdic.get(-1 * price, 10)
+            height = self.orderdic.get(-1 * price, 10) + preheight
         # 未实现: 应还有当前tick到下一tick的新增订单指令，当限价订单价格在其中时要增加高度修正
         self.connectdb()
         cursor = self.db.cursor()
@@ -163,8 +163,54 @@ class OrderList(object):
             cursor.close()
             self.closedb()
 
-    # 阻止单处理
-    def stoporders(self):
+    # 阻止单处理, 需要传入市价
+    def stoporders(self, price: float):
+        self.connectdb()
+        cursor = self.db.cursor()
+
+        # 买单停止单处理，市价高于停止单定价时买入
+        sql = '''
+        SELECT SID, Volume FROM stoplist
+        WHERE Type = %s AND %s > Price
+        '''
+        cursor.execute(sql, [0, price])
+        orders = cursor.fetchall()
+        for order in orders:
+            SID, OrderVol = order[0], order[1]
+            sql = '''
+            DELETE FROM stoplist
+            WHERE SID = %s
+            '''
+            try:
+                cursor.execute(sql, SID)
+                self.pos += OrderVol
+                self.capital -= OrderVol * price
+            except:
+                self.db.rollback()
+        
+        # 卖单停止单处理，市价低于停止单定价时卖出
+        sql = '''
+        SELECT SID, Volume FROM stoplist
+        WHERE Type = %s AND %s < Price
+        '''
+        cursor.execute(sql, [1, price])
+        orders = cursor.fetchall()
+        for order in orders:
+            SID, OrderVol = order[0], order[1]
+            sql = '''
+            DELETE FROM stoplist
+            WHERE SID = %s
+            '''
+            try:
+                cursor.execute(sql, SID)
+                self.pos -= OrderVol
+                self.capital += OrderVol * price
+            except:
+                self.db.rollback()
+
+        self.db.commit()
+        cursor.close()
+        self.closedb()
         pass
 
     def delall(self):
@@ -180,3 +226,6 @@ class OrderList(object):
         self.closedb()
 
 olist = OrderList()
+'''olist.addorder("", 0, 11.0, 1, 1, 5.0)
+olist.addorder("", 1, 10.0, 1, 1, 6.0)'''
+olist.stoporders(9.9)

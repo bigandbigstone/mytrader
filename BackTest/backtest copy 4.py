@@ -1,4 +1,5 @@
 import TickDataManager.tickdatamanager as tdm
+import TickStrategy.backtest_tick_one_strategy as ts
 class BackTestManager(object):
     # 回测思路，由生成的交易指令确定下单策略订单到成交面的高度
     # 即历史订单尾+新增或取消的订单修正（乘0.5加在历史订单尾）（与策略订单同周期的）
@@ -6,7 +7,8 @@ class BackTestManager(object):
     def __init__(self):
         self.dbmanager = tdm.TickDataManager()
         self.ticks = self.dbmanager.getdatabyorder()
-        pass
+        self.strategy = ts.TickOneStrategy()
+        
     def outputordersbyticks(self):
         n = len(self.ticks)
         n = 30

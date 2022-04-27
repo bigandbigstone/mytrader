@@ -36,6 +36,7 @@ class TickArrayManager(object):
     def askBidVolumeDif(self):
         return (self.TickaskVolume1Array.sum() - self.TickbidVolume1Array.sum())
 
+
 class TickOneStrategy(BackTestTemplate):
     '''基于Tick的高频策略'''
     name = "TickOneStrategy"
@@ -54,7 +55,7 @@ class TickOneStrategy(BackTestTemplate):
   
     # ----------------------------------------------------------------------
     def __init__(self):
-        #创建Array队列
+        #创建Array队列，而Orderlist队交给BackTestTemplate实现
         self.tickArray = TickArrayManager(self.Ticksize)
 
     # ----------------------------------------------------------------------
