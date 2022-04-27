@@ -16,8 +16,15 @@ class BackTestManager(object):
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)
         for i in range(1, n):
+            # 步骤1 预处理1 删除订单队列增值
+            self.strategy.orderlist.orderaddclear()
+
+            # 步骤2 预处理2 用于新建订单时的历史订单高度积累
+            self.strategy.updatetickdic(buydic, selldic)
+
+            # 步骤3 预处理3 生成模拟交易指令，并有上一轮的策略限价订单成交判定
             nowtick = self.ticks[i]
-            # 对买一价的处理
+            # 步骤3.1 对买一价的处理
             if nowtick[0] == pretick[0]:
                 # 买一价未发送变化
                 price, vol = 0.0, 0
@@ -64,7 +71,7 @@ class BackTestManager(object):
                     else:
                         break
             
-            # 更新非最优价买量
+            # 步骤3.2 更新非最优价买量
             for j in range(1,5):
                 # nowtick里其他买入价格
                 price, vol = nowtick[j], nowtick[j + 10]
@@ -76,7 +83,7 @@ class BackTestManager(object):
                 elif prevol > vol:
                     self.orderoutput("取消", "买单", price, prevol - vol)
 
-            # 对卖一价的处理
+            # 步骤3.3 对卖一价的处理
             if nowtick[5] == pretick[5]:
                 # 卖一价未发送变化
                 price, vol = 0.0, 0
@@ -122,7 +129,7 @@ class BackTestManager(object):
                     else:
                         break
             
-            # 更新非最优价卖量
+            # 步骤3.4 更新非最优价卖量
             for j in range(6,10):
                 # nowtick里其他卖出价格
                 price, vol = nowtick[j], nowtick[j + 10]
@@ -133,7 +140,14 @@ class BackTestManager(object):
                     self.orderoutput("新增", "卖单", price, vol - prevol)
                 elif prevol > vol:
                     self.orderoutput("取消", "卖单", price, prevol - vol)
+            
+            # 步骤4 处理上一轮的策略停止单，输入最近成交价格last_price
+            self.strategy.orderlist.stoporders(pretick[20])
 
+            # 步骤5 本轮策略进行，因为有用于订单成交判定的成交高度修正，所以要放在最后
+            self.strategy.on_tick(pretick)
+
+            # 步骤6 tick数据更新
             pretick = nowtick
             buydic = self.tobuydic(pretick)
             selldic = self.toselldic(pretick)
@@ -152,8 +166,6 @@ class BackTestManager(object):
         return dic
 
     def orderoutput(self, action: str, type: str, price: float, vol: int):
-        print(action + ' ' + type + ' ' + str(price) + ' ' + str(vol))
-
-
-backtest = BackTestManager()
-backtest.outputordersbyticks()
+        # print(action + ' ' + type + ' ' + str(price) + ' ' + str(vol))
+        # 包括了新增订单高度修正，上一轮限价订单成交判定
+        self.strategy.orderlist.orderinput(action, type, price, vol)

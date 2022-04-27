@@ -1,4 +1,3 @@
-# 未实现
 from pygments import highlight
 import pymysql
 # 完全实现，OK！
@@ -224,8 +223,3 @@ class OrderList(object):
 
         cursor.close()
         self.closedb()
-
-olist = OrderList()
-'''olist.addorder("", 0, 11.0, 1, 1, 5.0)
-olist.addorder("", 1, 10.0, 1, 1, 6.0)'''
-olist.stoporders(9.9)

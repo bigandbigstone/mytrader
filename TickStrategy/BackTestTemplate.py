@@ -13,12 +13,15 @@ class BackTestTemplate(object):
     def __init__(self):
         self.orderlist = OrderList()
     
-    def updatetickdic(self, pretickdic: dict):
-        self.tickdic = pretickdic
+    def updatetickdic(self, prebuydic: dict, preselldic: dict):
+        self.buydic = prebuydic
+        self.selldic = preselldic
 
     def getheight(self, price: float) -> float:
-        if price in self.tickdic:
-            return self.tickdic[price]
+        if price in self.buydic:
+            return self.buydic[price]
+        elif price in self.selldic[price]:
+            return self.selldic[price]
         else:
             return 0.0
 
