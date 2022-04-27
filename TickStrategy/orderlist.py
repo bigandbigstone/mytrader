@@ -3,6 +3,9 @@ from pygments import highlight
 import pymysql
 
 class OrderList(object):
+    pos = 0
+    capital = 0
+
     def __init__(self):
         # 用于存储每轮tick的订单新增调整值，买单为正，卖单为负
         self.orderdic = dict()
@@ -118,7 +121,7 @@ class OrderList(object):
             cursor = self.db.cursor()
 
             sql = '''
-            SELECT LID, Height FROM limitlist
+            SELECT LID, Height, Volume FROM limitlist
                 WHERE Type = %s AND Price = %s
             '''
             if type == "买单":
@@ -128,7 +131,7 @@ class OrderList(object):
 
             orders = cursor.fetchall()
             for order in orders:
-                LID, Height = order[0], order[1]
+                LID, Height, OrderVol = order[0], order[1], order[2]
                 Height -= vol
                 if Height > 0:
                     # 更新高度
@@ -146,7 +149,13 @@ class OrderList(object):
                     '''
                     try:
                         cursor.execute(sql, LID)
-                        # 成交部分实现
+                        # 成交部分已经实现
+                        if type == "买单":
+                            self.pos += OrderVol
+                            self.capital -= OrderVol * price
+                        else:
+                            self.pos -= OrderVol
+                            self.capital += OrderVol * price
                     except:
                         self.db.rollback()
 
