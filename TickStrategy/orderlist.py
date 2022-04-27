@@ -163,6 +163,10 @@ class OrderList(object):
             cursor.close()
             self.closedb()
 
+    # 阻止单处理
+    def stoporders(self):
+        pass
+
     def delall(self):
         # 清空未成交订单包括限价和停止单
         self.connectdb()
