@@ -12,7 +12,7 @@ class BackTestManager(object):
         
     def outputordersbyticks(self):
         n = len(self.ticks)
-        n = 1000
+        n = 10000
         pretick = self.ticks[0]
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)

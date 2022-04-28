@@ -47,8 +47,9 @@ class TickOneStrategy(BackTestTemplate):
     Ticksize = 10
     initDays = 0
   
+    # 主义修改
     DAY_START = time(9, 00)  # 日盘启动和停止时间
-    DAY_END = time(15, 58)
+    DAY_END = time(20, 59)
     NIGHT_START = time(21, 00)  # 夜盘启动和停止时间
     NIGHT_END = time(10, 58)
 
