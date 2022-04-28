@@ -166,6 +166,9 @@ class BackTestManager(object):
         return dic
 
     def orderoutput(self, action: str, type: str, price: float, vol: int):
-        # print(action + ' ' + type + ' ' + str(price) + ' ' + str(vol))
+        print(action + ' ' + type + ' ' + str(price) + ' ' + str(vol))
         # 包括了新增订单高度修正，上一轮限价订单成交判定
         self.strategy.orderlist.orderinput(action, type, price, vol)
+
+bt = BackTestManager()
+bt.outputordersbyticks()

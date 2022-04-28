@@ -1,7 +1,6 @@
 # TickOneStrategy for BackTest
 from datetime import datetime, time
-from turtle import pos
-from BackTestTemplate import BackTestTemplate
+from TickStrategy.BackTestTemplate import BackTestTemplate
 import numpy as np
 
 class TickArrayManager(object):
@@ -71,6 +70,11 @@ class TickOneStrategy(BackTestTemplate):
             TA.updateTick(tick)
             if not TA.inited:
                 return
+
+            # 拿出pos和posprice
+            self.pos = self.orderlist.pos
+            # self.posprice = 
+
             if self.pos == 0:
                 # 如果空仓，分析过去10个对比，ask买方多下空单，bid卖方多下多单，并防止两个差价阻止单
                 if TA.askBidVolumeDif() > 0:

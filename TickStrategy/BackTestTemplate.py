@@ -1,5 +1,4 @@
-from orderlist import OrderList
-from vnpy.trader.constant import Direction, Offset
+from TickStrategy.orderlist import OrderList
 
 class BackTestTemplate(object):
     
@@ -10,8 +9,11 @@ class BackTestTemplate(object):
     # 上一成交价格，这个咋整？
     # 这个都只能在成交后在说
 
+    
+    orderlist = OrderList()
+
     def __init__(self):
-        self.orderlist = OrderList()
+        pass
     
     def updatetickdic(self, prebuydic: dict, preselldic: dict):
         self.buydic = prebuydic
@@ -35,6 +37,7 @@ class BackTestTemplate(object):
         Send buy order to open a long position.
         """
         self.orderlist.addorder("开仓", 0, price, volume, stop, self.getheight(price))
+        print(1)
 
     def sell(
         self,
@@ -46,6 +49,7 @@ class BackTestTemplate(object):
         Send sell order to close a long position.
         """
         self.orderlist.addorder("平仓", 1, price, volume, stop, self.getheight(price))
+        print(2)
 
     def short(
         self,
@@ -57,6 +61,7 @@ class BackTestTemplate(object):
         Send short order to open as short position.
         """
         self.orderlist.addorder("开仓", 1, price, volume, stop, self.getheight(price))
+        print(3)
 
     def cover(
         self,
@@ -68,6 +73,7 @@ class BackTestTemplate(object):
         Send cover order to close a short position.
         """
         self.orderlist.addorder("平仓", 0, price, volume, stop, self.getheight(price))
+        print(4)
 
     def cancel_all(self):
         """
