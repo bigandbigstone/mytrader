@@ -4,27 +4,34 @@ import pymysql
 class OrderList(object):
     pos = 0
     capital = 0
+    posprice = 0
+    db = pymysql.connect(host='localhost',
+                     user='root',
+                     password='songlinshuo',
+                     database='traderdb')
 
     def __init__(self):
         # 用于存储每轮tick的订单新增调整值，买单为正，卖单为负
         self.orderdic = dict()
+        # 系统启动修正订单
+        self.delall()
         pass
     
     # 每轮tick需要调用一次清空
     def orderaddclear(self):
         self.orderdic.clear()
 
-    def connectdb(self):
+    '''def connectdb(self):
         self.db = pymysql.connect(host='localhost',
                      user='root',
                      password='songlinshuo',
-                     database='traderdb')
+                     database='traderdb')'''
 
-    def closedb(self):
-        self.db.close()
+    '''def closedb(self):
+        self.db.close()'''
 
     def createtable(self):
-        self.connectdb()
+        # self.connectdb()
         cursor = self.db.cursor()
         cursor.execute("DROP TABLE IF EXISTS limitlist")
         # Type 0为限价买单，1为卖单
@@ -52,17 +59,17 @@ class OrderList(object):
         cursor.execute(sql)
 
         cursor.close()
-        self.closedb()
+        # self.closedb()
         
     def addorder(self, offset: str, type: int, price: float, volume: int, stop: bool, preheight: float):
         # 向策略订单队列中增加订单，包括限价订单和停止单，preheight为当前tick（或pretick）的历史积累订单高度
         # type 0为买单，1为卖单
         if type == 0:
-            height = self.orderdic.get(price, 10) + preheight
+            height = self.orderdic.get(price, 0) + volume + preheight
         else:
-            height = self.orderdic.get(-1 * price, 10) + preheight
+            height = self.orderdic.get(-1 * price, 0) + volume + preheight
         # 未实现: 应还有当前tick到下一tick的新增订单指令，当限价订单价格在其中时要增加高度修正
-        self.connectdb()
+        # self.connectdb()
         cursor = self.db.cursor()
         if stop:
             # 若是阻止单
@@ -102,7 +109,7 @@ class OrderList(object):
 
         self.db.commit()
         cursor.close()
-        self.closedb()
+        # self.closedb()
 
     def orderinput(self,action: str, type: str, price: float, vol: int):
         # 要接入模拟交易指令，主要是针对的限价订单
@@ -116,7 +123,7 @@ class OrderList(object):
             else:
                 self.orderdic[-1 * price] = vol
         elif action == "撮合" or action == "取消":
-            self.connectdb()
+            # self.connectdb()
             cursor = self.db.cursor()
 
             sql = '''
@@ -152,19 +159,24 @@ class OrderList(object):
                         if type == "买单":
                             self.pos += OrderVol
                             self.capital -= OrderVol * price
+                            print("买入" + str(price) + " " + str(OrderVol))
                         else:
                             self.pos -= OrderVol
                             self.capital += OrderVol * price
+                            print("卖出" + str(price) + " " + str(OrderVol))
+
+                        # 更新成交价格
+                        self.posprice = price
                     except:
                         self.db.rollback()
 
             self.db.commit()
             cursor.close()
-            self.closedb()
+            # self.closedb()
 
     # 阻止单处理, 需要传入市价
     def stoporders(self, price: float):
-        self.connectdb()
+        # self.connectdb()
         cursor = self.db.cursor()
 
         # 买单停止单处理，市价高于停止单定价时买入
@@ -184,6 +196,9 @@ class OrderList(object):
                 cursor.execute(sql, SID)
                 self.pos += OrderVol
                 self.capital -= OrderVol * price
+                # 更新成交价格
+                self.posprice = price
+                print("买入" + str(price) + " " + str(OrderVol))
             except:
                 self.db.rollback()
         
@@ -204,17 +219,19 @@ class OrderList(object):
                 cursor.execute(sql, SID)
                 self.pos -= OrderVol
                 self.capital += OrderVol * price
+                # 更新成交价格
+                self.posprice = price
+                print("卖出" + str(price) + " " + str(OrderVol))
             except:
                 self.db.rollback()
 
         self.db.commit()
         cursor.close()
-        self.closedb()
-        pass
+        # self.closedb()
 
     def delall(self):
         # 清空未成交订单包括限价和停止单
-        self.connectdb()
+        # self.connectdb()
         cursor = self.db.cursor()
         
         # 截断清空，truncate table tbl_name
@@ -222,4 +239,4 @@ class OrderList(object):
         cursor.execute("TRUNCATE TABLE stoplist")
 
         cursor.close()
-        self.closedb()
+        # self.closedb()

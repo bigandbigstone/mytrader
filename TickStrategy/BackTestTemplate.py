@@ -22,7 +22,7 @@ class BackTestTemplate(object):
     def getheight(self, price: float) -> float:
         if price in self.buydic:
             return self.buydic[price]
-        elif price in self.selldic[price]:
+        elif price in self.selldic:
             return self.selldic[price]
         else:
             return 0.0

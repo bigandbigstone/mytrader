@@ -48,9 +48,15 @@ class TickOneStrategy(BackTestTemplate):
     initDays = 0
   
     DAY_START = time(9, 00)  # 日盘启动和停止时间
-    DAY_END = time(14, 58)
+    DAY_END = time(15, 58)
     NIGHT_START = time(21, 00)  # 夜盘启动和停止时间
     NIGHT_END = time(10, 58)
+
+    pos = 0
+    posPrice = 474.0
+    d = 0.5
+    stopd = 1
+    wind = 1
   
     # ----------------------------------------------------------------------
     def __init__(self):
@@ -71,35 +77,35 @@ class TickOneStrategy(BackTestTemplate):
             if not TA.inited:
                 return
 
-            # 拿出pos和posprice
+            # 拿出pos和posPrice
             self.pos = self.orderlist.pos
-            # self.posprice = 
+            self.posPrice = self.orderlist.posprice
 
             if self.pos == 0:
                 # 如果空仓，分析过去10个对比，ask买方多下空单，bid卖方多下多单，并防止两个差价阻止单
                 if TA.askBidVolumeDif() > 0:
                     self.short(tick[20], self.fixedSize, False)
-                    self.cover(tick[20] + 2,self.fixedSize, True)
+                    self.cover(tick[20] + self.stopd * self.d,self.fixedSize, True)
                 elif TA.askBidVolumeDif() < 0:
                     self.buy(tick[20], self.fixedSize, False)
-                    self.sell(tick[20] - 2, self.fixedSize, True)
+                    self.sell(tick[20] - self.stopd * self.d, self.fixedSize, True)
   
             elif self.pos > 0:
                 # 如果持有多单，如果已经是买入价格正向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果持有，清掉之前阻止单，改挂当前价位反向2个点阻止单。
-                if  tick[20] - self.posPrice >= 3:
+                if  tick[20] - self.posPrice >= self.wind * self.d:
                     if TA.askBidVolumeDif() < 0:
                         self.cancel_all()
-                        self.sell(tick[20] - 2, self.fixedSize, True)
+                        self.sell(tick[20] - self.stopd * self.d, self.fixedSize, True)
                     else:
                         self.cancel_all()
                         self.sell(tick[20], self.fixedSize, False)
   
             elif self.pos < 0:
                 # 如果持有空单，如果已经是买入价格反向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果持有，清掉之前阻止单，改挂当前价位反向2个点阻止单。
-                if  tick[20] - self.posPrice <= -3:
+                if  tick[20] - self.posPrice <= -1 * self.wind * self.d:
                     if TA.askBidVolumeDif() > 0:
                         self.cancel_all()
-                        self.cover(tick[20] + 2, self.fixedSize, True)
+                        self.cover(tick[20] + self.stopd * self.d, self.fixedSize, True)
                     else:
                         self.cancel_all()
                         self.cover(tick[20], self.fixedSize, False)

@@ -1,3 +1,4 @@
+import datetime
 import TickDataManager.tickdatamanager as tdm
 import TickStrategy.backtest_tick_one_strategy as ts
 class BackTestManager(object):
@@ -11,7 +12,7 @@ class BackTestManager(object):
         
     def outputordersbyticks(self):
         n = len(self.ticks)
-        n = 30
+        n = 1000
         pretick = self.ticks[0]
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)
@@ -147,6 +148,9 @@ class BackTestManager(object):
             # 步骤5 本轮策略进行，因为有用于订单成交判定的成交高度修正，所以要放在最后
             self.strategy.on_tick(pretick)
 
+            # 输出当前资产
+            print(self.strategy.orderlist.capital + self.strategy.orderlist.pos * nowtick[20])
+
             # 步骤6 tick数据更新
             pretick = nowtick
             buydic = self.tobuydic(pretick)
@@ -166,9 +170,12 @@ class BackTestManager(object):
         return dic
 
     def orderoutput(self, action: str, type: str, price: float, vol: int):
-        print(action + ' ' + type + ' ' + str(price) + ' ' + str(vol))
+        # print(action + ' ' + type + ' ' + str(price) + ' ' + str(vol))
         # 包括了新增订单高度修正，上一轮限价订单成交判定
         self.strategy.orderlist.orderinput(action, type, price, vol)
 
+start = datetime.datetime.now()
 bt = BackTestManager()
 bt.outputordersbyticks()
+end = datetime.datetime.now()
+print(end - start)
