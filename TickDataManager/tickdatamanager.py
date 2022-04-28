@@ -1,3 +1,4 @@
+# 同步tickdb
 import datetime
 from unittest import result
 import pymysql

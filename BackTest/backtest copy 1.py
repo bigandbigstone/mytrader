@@ -1,3 +1,4 @@
+# 回测备份版本1
 import TickDataManager.tickdatamanager as tdm
 class BackTestManager(object):
     def __init__(self):

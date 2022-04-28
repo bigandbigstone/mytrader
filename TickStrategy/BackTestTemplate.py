@@ -1,3 +1,4 @@
+# BackTest策略基类
 from TickStrategy.orderlist import OrderList
 
 class BackTestTemplate(object):
@@ -73,7 +74,11 @@ class BackTestTemplate(object):
         Send cover order to close a short position.
         """
         self.orderlist.addorder("平仓", 0, price, volume, stop, self.getheight(price))
-        print(4)
+        if stop:
+            print(4)
+        else:
+            print(5)
+        
 
     def cancel_all(self):
         """

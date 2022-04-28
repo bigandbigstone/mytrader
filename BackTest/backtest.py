@@ -1,4 +1,4 @@
-# 未实现，最新版本见copy4
+#回测备份版本0，最新版本见copy4
 import TickDataManager.tickdatamanager as tdm
 class BackTestManager(object):
     def __init__(self):

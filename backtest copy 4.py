@@ -1,3 +1,4 @@
+# 回测备份版本4
 import datetime
 import TickDataManager.tickdatamanager as tdm
 import TickStrategy.backtest_tick_one_strategy as ts
@@ -12,11 +13,10 @@ class BackTestManager(object):
         
     def outputordersbyticks(self):
         n = len(self.ticks)
-        n = 10000
         pretick = self.ticks[0]
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)
-        for i in range(1, n):
+        for i in range(5000, 6000):
             # 步骤1 预处理1 删除订单队列增值
             self.strategy.orderlist.orderaddclear()
 
@@ -149,6 +149,7 @@ class BackTestManager(object):
             self.strategy.on_tick(pretick)
 
             # 输出当前资产
+            print(self.strategy.orderlist.pos)
             print(self.strategy.orderlist.capital + self.strategy.orderlist.pos * nowtick[20])
 
             # 步骤6 tick数据更新

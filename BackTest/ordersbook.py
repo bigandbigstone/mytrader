@@ -1,3 +1,4 @@
+# 图形界面使用
 from collections import deque
 import TickDataManager.tickdatamanager as tdm
 class OrdersBook(object):

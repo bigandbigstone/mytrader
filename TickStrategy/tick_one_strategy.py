@@ -1,3 +1,4 @@
+# 供vnpy装载的TickOneStrategy
 from datetime import datetime, time
 from pydoc import classname
 import numpy as np

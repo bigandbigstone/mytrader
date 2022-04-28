@@ -1,3 +1,4 @@
+# 异步tickdb
 import asyncio
 import datetime
 import aiomysql

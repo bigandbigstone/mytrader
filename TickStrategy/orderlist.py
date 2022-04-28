@@ -1,3 +1,4 @@
+# orderlist用于维护策略订单
 from pygments import highlight
 import pymysql
 # 完全实现，OK！
@@ -179,10 +180,10 @@ class OrderList(object):
         # self.connectdb()
         cursor = self.db.cursor()
 
-        # 买单停止单处理，市价高于停止单定价时买入
+        # 买单停止单处理，市价高于等于停止单定价时买入
         sql = '''
         SELECT SID, Volume FROM stoplist
-        WHERE Type = %s AND %s > Price
+        WHERE Type = %s AND %s >= Price
         '''
         cursor.execute(sql, [0, price])
         orders = cursor.fetchall()
@@ -202,10 +203,10 @@ class OrderList(object):
             except:
                 self.db.rollback()
         
-        # 卖单停止单处理，市价低于停止单定价时卖出
+        # 卖单停止单处理，市价低于等于停止单定价时卖出
         sql = '''
         SELECT SID, Volume FROM stoplist
-        WHERE Type = %s AND %s < Price
+        WHERE Type = %s AND %s <= Price
         '''
         cursor.execute(sql, [1, price])
         orders = cursor.fetchall()
