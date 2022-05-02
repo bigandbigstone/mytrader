@@ -5,7 +5,7 @@ import pymysql
 class OrderList(object):
     pos = 0
     capital = 0
-    posprice = 0
+    posprice = 474.0
     db = pymysql.connect(host='localhost',
                      user='root',
                      password='songlinshuo',

@@ -55,7 +55,7 @@ class TickOneStrategy(BackTestTemplate):
     NIGHT_END = time(10, 58)
 
     pos = 0
-    posPrice = 474.0
+    posPrice = 0
     d = 0.5
     stopd = 2
     wind = 3
