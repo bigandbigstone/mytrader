@@ -11,20 +11,8 @@ class BackTestManager(object):
         self.ticks = self.dbmanager.getdatabyorder()
         self.strategy = ts.TickOneStrategy()
         
-    def outputordersbyticks(self):
-        n = len(self.ticks)
-        pretick = self.ticks[0]
-        buydic = self.tobuydic(pretick)
-        selldic = self.toselldic(pretick)
-        for i in range(0, n):
-            # 步骤1 预处理1 删除订单队列增值
-            self.strategy.orderlist.orderaddclear()
-
-            # 步骤2 预处理2 用于新建订单时的历史订单高度积累
-            self.strategy.updatetickdic(buydic, selldic)
-
-            # 步骤3 预处理3 生成模拟交易指令，并有上一轮的策略限价订单成交判定
-            nowtick = self.ticks[i]
+    def outputordersbyticks(self, pretick: list, nowtick: list):
+        # 步骤3 预处理3 生成模拟交易指令，并有上一轮的策略限价订单成交判定
             # 步骤3.1 对买一价的处理
             if nowtick[0] == pretick[0]:
                 # 买一价未发送变化
@@ -53,8 +41,8 @@ class BackTestManager(object):
                 # 对当前买一价的处理
                 price = nowtick[0]
                 vol = nowtick[10]
-                if price in buydic:
-                    prevol = buydic[price]
+                if price in self.buydic:
+                    prevol = self.buydic[price]
                     if prevol > vol:
                         self.orderoutput("撮合", "买单", price, prevol - vol)
                     elif prevol < vol:
@@ -77,8 +65,8 @@ class BackTestManager(object):
                 # nowtick里其他买入价格
                 price, vol = nowtick[j], nowtick[j + 10]
                 prevol = 0
-                if price in buydic:
-                    prevol = buydic[price]
+                if price in self.buydic:
+                    prevol = self.buydic[price]
                 if vol > prevol:
                     self.orderoutput("新增", "买单", price, vol - prevol)
                 elif prevol > vol:
@@ -111,8 +99,8 @@ class BackTestManager(object):
                 # 对当前卖一价的处理
                 price = nowtick[5]
                 vol = nowtick[15]
-                if price in selldic:
-                    prevol = selldic[price]
+                if price in self.selldic:
+                    prevol = self.selldic[price]
                     if prevol > vol:
                         self.orderoutput("撮合", "卖单", price, prevol - vol)
                     elif prevol < vol:
@@ -135,16 +123,33 @@ class BackTestManager(object):
                 # nowtick里其他卖出价格
                 price, vol = nowtick[j], nowtick[j + 10]
                 prevol = 0
-                if price in selldic:
-                    prevol = selldic[price]
+                if price in self.selldic:
+                    prevol = self.selldic[price]
                 if vol > prevol:
                     self.orderoutput("新增", "卖单", price, vol - prevol)
                 elif prevol > vol:
                     self.orderoutput("取消", "卖单", price, prevol - vol)
+    
+    def btmain(self):
+        n = len(self.ticks)
+        pretick = self.ticks[0]
+        self.buydic = self.tobuydic(pretick)
+        self.selldic = self.toselldic(pretick)
+        for i in range(1, n):
+            # 步骤0 预处理0 nowtick更新
+            nowtick = self.ticks[i]
+
+            # 步骤1 预处理1 删除订单队列增值
+            self.strategy.orderlist.orderaddclear()
+
+            # 步骤2 预处理2 用于新建订单时的历史订单高度积累
+            self.strategy.updatetickdic(self.buydic, self.selldic)
+
+            # 步骤3 生成模拟交易指令，并有上一轮的策略限价订单成交判定
+            self.outputordersbyticks(pretick, nowtick)
             
             # 步骤4 处理上一轮的策略停止单，输入最近成交价格last_price
             self.strategy.orderlist.stoporders(pretick[20])
-
 
             # 步骤5 本轮策略进行，因为有用于订单成交判定的成交高度修正，所以要放在最后
             self.strategy.on_tick(pretick)
@@ -155,10 +160,10 @@ class BackTestManager(object):
 
             # 步骤6 tick数据更新
             pretick = nowtick
-            buydic = self.tobuydic(pretick)
-            selldic = self.toselldic(pretick)
+            self.buydic = self.tobuydic(pretick)
+            self.selldic = self.toselldic(pretick)
             print()
-    
+
     def tobuydic(self, tick: list) -> dict:
         dic = dict()
         for i in range(5):
@@ -178,6 +183,6 @@ class BackTestManager(object):
 
 start = datetime.datetime.now()
 bt = BackTestManager()
-bt.outputordersbyticks()
+bt.btmain()
 end = datetime.datetime.now()
 print(end - start)
