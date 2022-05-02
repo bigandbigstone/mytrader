@@ -16,7 +16,7 @@ class BackTestManager(object):
         pretick = self.ticks[0]
         buydic = self.tobuydic(pretick)
         selldic = self.toselldic(pretick)
-        for i in range(5000, 6000):
+        for i in range(0, n):
             # 步骤1 预处理1 删除订单队列增值
             self.strategy.orderlist.orderaddclear()
 
