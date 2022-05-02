@@ -175,12 +175,13 @@ class OrderList(object):
             cursor.close()
             # self.closedb()
 
-    # 阻止单处理, 需要传入市价
-    def stoporders(self, price: float):
+    # 阻止单处理, 需要传入市价和市价对应高度nowheight
+    def stoporders(self, price: float, nowheight: float):
         # self.connectdb()
         cursor = self.db.cursor()
 
-        # 买单停止单处理，市价高于等于停止单定价时买入
+        # 买单停止单处理，市价高于等于停止单定价时买入 ×
+        # 不应该进行买入，而应该转为限价单买入 √
         sql = '''
         SELECT SID, Volume FROM stoplist
         WHERE Type = %s AND %s >= Price
@@ -194,16 +195,20 @@ class OrderList(object):
             WHERE SID = %s
             '''
             try:
-                cursor.execute(sql, SID)
+                # 失效
+                '''cursor.execute(sql, SID)
                 self.pos += OrderVol
                 self.capital -= OrderVol * price
                 # 更新成交价格
                 self.posprice = price
-                print("买入" + str(price) + " " + str(OrderVol))
+                print("买入" + str(price) + " " + str(OrderVol))'''
+                # 新
+                self.orderlist.addorder("待定", 0, price, OrderVol, False, nowheight)
             except:
                 self.db.rollback()
         
-        # 卖单停止单处理，市价低于等于停止单定价时卖出
+        # 卖单停止单处理，市价低于等于停止单定价时卖出 ×
+        # 不应该直接进行卖出，而应该转为限价单卖出 √
         sql = '''
         SELECT SID, Volume FROM stoplist
         WHERE Type = %s AND %s <= Price
@@ -218,11 +223,14 @@ class OrderList(object):
             '''
             try:
                 cursor.execute(sql, SID)
-                self.pos -= OrderVol
+                # 失效
+                '''self.pos -= OrderVol
                 self.capital += OrderVol * price
                 # 更新成交价格
                 self.posprice = price
-                print("卖出" + str(price) + " " + str(OrderVol))
+                print("卖出" + str(price) + " " + str(OrderVol))'''
+                # 新
+                self.orderlist.addorder("待定", 1, price, OrderVol, False, nowheight)
             except:
                 self.db.rollback()
 

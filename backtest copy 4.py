@@ -142,8 +142,12 @@ class BackTestManager(object):
                 elif prevol > vol:
                     self.orderoutput("取消", "卖单", price, prevol - vol)
             
-            # 步骤4 处理上一轮的策略停止单，输入最近成交价格last_price
-            self.strategy.orderlist.stoporders(pretick[20])
+            # 步骤4 处理上一轮的策略停止单，输入最近成交价格last_price和其历史订单高度
+            if pretick[20] == pretick[0]:
+                self.strategy.orderlist.stoporders(pretick[20], pretick[10])
+            else:
+                self.strategy.orderlist.stoporders(pretick[20], pretick[15])
+
 
             # 步骤5 本轮策略进行，因为有用于订单成交判定的成交高度修正，所以要放在最后
             self.strategy.on_tick(pretick)
