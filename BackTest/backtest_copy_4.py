@@ -1,15 +1,15 @@
 # 回测备份版本4
 import datetime
-import TickDataManager.tickdatamanager as tdm
-import TickStrategy.backtest_tick_one_strategy as ts
+from TickDataManager.tickdatamanager import TickDataManager
+from TickStrategy.backtest_tick_one_strategy import TickOneStrategy
 class BackTestManager(object):
     # 回测思路，由生成的交易指令确定下单策略订单到成交面的高度
     # 即历史订单尾+新增或取消的订单修正（乘0.5加在历史订单尾）（与策略订单同周期的）
     # 下一tick级进行撮合判断，在撮合范围则订单成交，非撮合范围则降低策略订单到成交面的高度，降低的距离为撮合量（成交）
     def __init__(self):
-        self.dbmanager = tdm.TickDataManager()
+        self.dbmanager = TickDataManager()
         self.ticks = self.dbmanager.getdatabyorder()
-        self.strategy = ts.TickOneStrategy()
+        self.strategy = TickOneStrategy()
         
     def outputordersbyticks(self, pretick: list, nowtick: list):
         # 步骤3 预处理3 生成模拟交易指令，并有上一轮的策略限价订单成交判定
@@ -181,8 +181,8 @@ class BackTestManager(object):
         # 包括了新增订单高度修正，上一轮限价订单成交判定
         self.strategy.orderlist.orderinput(action, type, price, vol)
 
-start = datetime.datetime.now()
+'''start = datetime.datetime.now()
 bt = BackTestManager()
 bt.btmain()
 end = datetime.datetime.now()
-print(end - start)
+print(end - start)'''
