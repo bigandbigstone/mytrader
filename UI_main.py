@@ -1,12 +1,12 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from BackTestGUI.Ui_BackTestWindow import Ui_Dialog
+from BackTestGUI.Ui_Mainwindow import Ui_MainWindow
  
-class mywindow(QtWidgets.QMainWindow,Ui_Dialog):
+class mywindow(QtWidgets.QMainWindow,Ui_MainWindow):
   def __init__(self):
     super(mywindow,self).__init__()
     self.setupUi(self)
- 
+    
 if __name__=='__main__':
   app = QtWidgets.QApplication(sys.argv)
   window = mywindow()
