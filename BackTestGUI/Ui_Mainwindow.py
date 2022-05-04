@@ -10,7 +10,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -22,7 +21,8 @@ class Ui_MainWindow(object):
         self.orderflow = QtWidgets.QTableView(self.centralwidget)
         self.orderflow.setGeometry(QtCore.QRect(20, 20, 256, 311))
         self.orderflow.setObjectName("orderflow")
-        self.uodata_orderflow()
+        '''orderf = [["","","",""],["","","",""],["","","",""]]
+        self.uodata_orderflow(orderf)'''
 
         self.orderlist = QtWidgets.QTableView(self.centralwidget)
         self.orderlist.setGeometry(QtCore.QRect(20, 360, 256, 331))
@@ -41,20 +41,22 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
-    def uodata_orderflow(self):
-        self.model = QtGui.QStandardItemModel(4,3)
-        self.model.setHorizontalHeaderLabels(['id','姓名','年龄'])
+    def uodata_orderflow(self, orderf):
+        self.model = QtGui.QStandardItemModel()
+        self.model.setHorizontalHeaderLabels(['操作', '方向', '价位', '容量'])
         self.orderflow.setModel(self.model)
-        item11 = QtGui.QStandardItem('10')
-        item12 = QtGui.QStandardItem('张三')
-        item13 = QtGui.QStandardItem('123')
-        self.model.setItem(0,0,item11)
-        self.model.setItem(0,1,item12)
-        self.model.setItem(0,2,item13)
+        for order in orderf:
+            item1 = QtGui.QStandardItem(order[0])
+            item2 = QtGui.QStandardItem(order[1])
+            item3 = QtGui.QStandardItem(str(order[2]))
+            item4 = QtGui.QStandardItem(str(order[3]))
+            self.model.appendRow([item1,item2,item3,item4])
         self.orderflow.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         # pass
 
@@ -66,3 +68,8 @@ class Ui_MainWindow(object):
 
     def uodata_histogram(self):
         pass
+
+class MyWindow(QtWidgets.QMainWindow,Ui_MainWindow):
+  def __init__(self):
+    super(MyWindow,self).__init__()
+    self.setupUi(self)

@@ -3,21 +3,27 @@ from pygments import highlight
 import pymysql
 # 完全实现，OK！
 class OrderList(object):
-    pos = 0
+    '''pos = 0
     capital = 0
     posprice = 474.0
     db = pymysql.connect(host='localhost',
                      user='root',
                      password='songlinshuo',
-                     database='traderdb')
+                     database='traderdb')'''
 
     def __init__(self):
         # 用于存储每轮tick的订单新增调整值，买单为正，卖单为负
         self.orderdic = dict()
         # 系统启动修正订单
+        self.pos = 0
+        self.capital = 0
+        self.posprice = 474.0
+        self.db = pymysql.connect(host='localhost',
+                        user='root',
+                        password='songlinshuo',
+                        database='traderdb')
         self.delall()
-        pass
-    
+        
     # 每轮tick需要调用一次清空
     def orderaddclear(self):
         self.orderdic.clear()
@@ -112,68 +118,70 @@ class OrderList(object):
         cursor.close()
         # self.closedb()
 
-    def orderinput(self,action: str, type: str, price: float, vol: int):
+    def orderinput(self, orderflow):
         # 要接入模拟交易指令，主要是针对的限价订单
         # 新增订单用于订单创建时的高度修正
         # 订单取消，高度降低
         # 订单撮合，高度降低
         # 高度降低到0，即为成交
-        if action == "新增":
-            if type == "买单":
-                self.orderdic[price] = vol
-            else:
-                self.orderdic[-1 * price] = vol
-        elif action == "撮合" or action == "取消":
-            # self.connectdb()
-            cursor = self.db.cursor()
-
-            sql = '''
-            SELECT LID, Height, Volume FROM limitlist
-                WHERE Type = %s AND Price = %s
-            '''
-            if type == "买单":
-                cursor.execute(sql, [0, price])
-            else:
-                cursor.execute(sql, [1, price])
-
-            orders = cursor.fetchall()
-            for order in orders:
-                LID, Height, OrderVol = order[0], order[1], order[2]
-                Height -= vol
-                if Height > 0:
-                    # 更新高度
-                    sql = '''
-                    UPDATE limitlist SET Height = %s WHERE LID = %s
-                    '''
-                    try:
-                        cursor.execute(sql,[Height, LID])
-                    except:
-                        self.db.rollback()
+        for order in orderflow:
+            action, type, price, vol = order[0], order[1], order[2], order[3]
+            if action == "新增":
+                if type == "买单":
+                    self.orderdic[price] = vol
                 else:
-                    sql = '''
-                    DELETE FROM limitlist
-                    WHERE LID = %s
-                    '''
-                    try:
-                        cursor.execute(sql, LID)
-                        # 成交部分已经实现
-                        if type == "买单":
-                            self.pos += OrderVol
-                            self.capital -= OrderVol * price
-                            print("买入" + str(price) + " " + str(OrderVol))
-                        else:
-                            self.pos -= OrderVol
-                            self.capital += OrderVol * price
-                            print("卖出" + str(price) + " " + str(OrderVol))
+                    self.orderdic[-1 * price] = vol
+            elif action == "撮合" or action == "取消":
+                # self.connectdb()
+                cursor = self.db.cursor()
 
-                        # 更新成交价格
-                        self.posprice = price
-                    except:
-                        self.db.rollback()
+                sql = '''
+                SELECT LID, Height, Volume FROM limitlist
+                    WHERE Type = %s AND Price = %s
+                '''
+                if type == "买单":
+                    cursor.execute(sql, [0, price])
+                else:
+                    cursor.execute(sql, [1, price])
 
-            self.db.commit()
-            cursor.close()
-            # self.closedb()
+                orders = cursor.fetchall()
+                for order in orders:
+                    LID, Height, OrderVol = order[0], order[1], order[2]
+                    Height -= vol
+                    if Height > 0:
+                        # 更新高度
+                        sql = '''
+                        UPDATE limitlist SET Height = %s WHERE LID = %s
+                        '''
+                        try:
+                            cursor.execute(sql,[Height, LID])
+                        except:
+                            self.db.rollback()
+                    else:
+                        sql = '''
+                        DELETE FROM limitlist
+                        WHERE LID = %s
+                        '''
+                        try:
+                            cursor.execute(sql, LID)
+                            # 成交部分已经实现
+                            if type == "买单":
+                                self.pos += OrderVol
+                                self.capital -= OrderVol * price
+                                print("买入" + str(price) + " " + str(OrderVol))
+                            else:
+                                self.pos -= OrderVol
+                                self.capital += OrderVol * price
+                                print("卖出" + str(price) + " " + str(OrderVol))
+
+                            # 更新成交价格
+                            self.posprice = price
+                        except:
+                            self.db.rollback()
+
+                self.db.commit()
+                cursor.close()
+                # self.closedb()
 
     # 阻止单处理, 需要传入市价和市价对应高度nowheight, 针对的是sell和cover订单
     # 故pos >= 0时，买入停止单cover视为无效；当pos <= 0时，卖出停止单sell视为无效订单
