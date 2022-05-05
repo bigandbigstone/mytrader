@@ -54,23 +54,24 @@ class Ui_MainWindow(object):
         self.NextButton.setEnabled(True)
         self.NextButton.clicked.connect(self.NextAction)
 
-        self.StopButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        self.StopButton.setObjectName("StopButton")
-        self.verticalLayout.addWidget(self.StopButton)
-        self.StopButton.clicked.connect(self.StopAction)
+        self.ResetButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.ResetButton.setObjectName("ResetButton")
+        self.verticalLayout.addWidget(self.ResetButton)
+        self.ResetButton.clicked.connect(self.ResetAction)
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         
         self.p = BackTestManager(main_win=self)
+        self.start = False
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.StartButton.setText(_translate("MainWindow", "START"))
-        self.NextButton.setText(_translate("MainWindow", "NEXTTICK"))
-        self.StopButton.setText(_translate("MainWindow", "STOP"))
+        self.StartButton.setText(_translate("MainWindow", "开始"))
+        self.NextButton.setText(_translate("MainWindow", "下一TICK"))
+        self.ResetButton.setText(_translate("MainWindow", "重置"))
 
     def update_orderflow(self, orderf):
         self.model = QtGui.QStandardItemModel()
@@ -96,13 +97,33 @@ class Ui_MainWindow(object):
         pass
 
     def StartAction(self):
-        self.p.start()
+        if not self.p is None:
+            if self.start == False:
+                self.p.runbytick = 0
+                self.start = True
+                self.StartButton.setText('结束')
+                self.p.start()
+            else:
+                self.start = False
+                self.StartButton.setText('开始')
+                if self.p.isRunning:
+                    self.p.terminate()
+                    self.p.quit()
+                self.p.index += 1
+                # 此为强制中断补偿，暂时这么写，实验起来是对的
     
     def NextAction(self):
-        pass
+        if not self.p is None:
+            if self.start == False:
+                self.p.runbytick = 1
+                self.p.start()
 
-    def StopAction(self):
-        pass
+    def ResetAction(self):
+        if not self.p is None:
+            if self.p.isRunning:
+                self.p.terminate()
+                self.p.quit()
+            self.p.index = 0
 
 class MyWindow(QtWidgets.QMainWindow,Ui_MainWindow):
   def __init__(self):

@@ -15,6 +15,7 @@ class OrderList(object):
         # 用于存储每轮tick的订单新增调整值，买单为正，卖单为负
         self.orderdic = dict()
         # 系统启动修正订单
+        self.add_proportion = 0.5
         self.pos = 0
         self.capital = 0
         self.posprice = 474.0
@@ -41,12 +42,14 @@ class OrderList(object):
         # self.connectdb()
         cursor = self.db.cursor()
         cursor.execute("DROP TABLE IF EXISTS limitlist")
+        # Offset 0为开仓，1位平仓
         # Type 0为限价买单，1为卖单
         # Height为成绩高度，订单创建时赋值为历史订单高度加新增订单大小
         # 成交订单回取消订单，降低高度，降低高度到0全部成交
         sql = """
         CREATE TABLE limitlist (
             LID INT PRIMARY KEY AUTO_INCREMENT,
+            Offset INT,
             Type INT,
             Price FLOAT,
             Volume INT,
@@ -59,6 +62,7 @@ class OrderList(object):
         sql = """
         CREATE TABLE stoplist (
             SID INT PRIMARY KEY AUTO_INCREMENT,
+            Offset INT,
             Type INT,
             Price FLOAT,
             Volume INT)
@@ -68,13 +72,13 @@ class OrderList(object):
         cursor.close()
         # self.closedb()
         
-    def addorder(self, offset: str, type: int, price: float, volume: int, stop: bool, preheight: float):
+    def addorder(self, offset: int, type: int, price: float, volume: int, stop: bool, preheight: float):
         # 向策略订单队列中增加订单，包括限价订单和停止单，preheight为当前tick（或pretick）的历史积累订单高度
         # type 0为买单，1为卖单
         if type == 0:
-            height = self.orderdic.get(price, 0) + volume + preheight
+            height = self.orderdic.get(price, 0) * self.add_proportion + volume + preheight
         else:
-            height = self.orderdic.get(-1 * price, 0) + volume + preheight
+            height = self.orderdic.get(-1 * price, 0) * self.add_proportion + volume + preheight
         # 未实现: 应还有当前tick到下一tick的新增订单指令，当限价订单价格在其中时要增加高度修正
         # self.connectdb()
         cursor = self.db.cursor()
@@ -82,16 +86,17 @@ class OrderList(object):
             # 若是阻止单
             sql = """
             INSERT INTO stoplist(
+                Offset,
                 Type,
                 Price,
                 Volume)
             VALUES (
-                %s, %s, %s
+                %s, %s, %s, %s
             )
             """
             try:
                 # 执行sql语句
-                cursor.execute(sql, [type, price, volume])
+                cursor.execute(sql, [offset ,type, price, volume])
             except:
                 # 发生错误时回滚
                 self.db.rollback()
@@ -99,17 +104,18 @@ class OrderList(object):
             # 若是限价单
             sql = """
             INSERT INTO limitlist(
+                Offset,
                 Type,
                 Price,
                 Volume,
                 Height)
             VALUES (
-                %s, %s, %s, %s
+                %s, %s, %s, %s, %s
             )
             """
             try:
                 # 执行sql语句
-                cursor.execute(sql, [type, price, volume, height])
+                cursor.execute(sql, [offset ,type, price, volume, height])
             except:
                 # 发生错误时回滚
                 self.db.rollback()
@@ -264,3 +270,25 @@ class OrderList(object):
 
         cursor.close()
         # self.closedb()
+
+    def getorderlist(self) -> list:
+        orderl = list()
+        cursor = self.db.cursor()
+
+        sql = '''
+        SELECT LID, Offset, Type, Price, Volume, Height FROM limitlist
+        '''
+        cursor.execute(sql)
+        orders = cursor.fetchall()
+        orderl.extend(orders)
+
+        # " "表空
+        sql = '''
+        SELECT SID, Offset, Type, Price, Volume, ' ' FROM stoplist
+        '''
+        cursor.execute(sql)
+        orders = cursor.fetchall()
+        orderl.extend(orders)
+
+        cursor.close()
+        return orderl

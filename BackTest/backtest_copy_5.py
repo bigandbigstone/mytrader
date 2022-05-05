@@ -1,5 +1,6 @@
 # 回测备份版本5
 from signal import signal
+import time
 from PyQt5.QtCore import QThread, pyqtSignal
 from TickDataManager.tickdatamanager import TickDataManager
 from TickStrategy.backtest_tick_one_strategy import TickOneStrategy
@@ -19,6 +20,10 @@ class BackTestManager(QThread):
 
         self.signal.connect(self.refresh)
         self.main_win = kwargs.get('main_win')
+
+        self.runbytick = 0
+        self.index = 0
+        self.n = len(self.ticks)
         
     def outputordersbyticks(self, pretick: list, nowtick: list):
         # 步骤3 预处理3 生成模拟交易指令，并有上一轮的策略限价订单成交判定
@@ -140,13 +145,13 @@ class BackTestManager(QThread):
                     self.orderoutput("取消", "卖单", price, prevol - vol)
     
     def run(self):
-        n = len(self.ticks)
-        pretick = self.ticks[0]
+        pretick = self.ticks[self.index]
         self.buydic = self.tobuydic(pretick)
         self.selldic = self.toselldic(pretick)
-        for i in range(1, n):
+        while self.index + 1 < self.n:
+
             # 步骤0 预处理0 nowtick更新
-            nowtick = self.ticks[i]
+            nowtick = self.ticks[self.index + 1]
 
             # 步骤1 预处理1 删除订单队列增值和订单指令流
             self.strategy.orderlist.orderaddclear()
@@ -170,7 +175,9 @@ class BackTestManager(QThread):
             # 信号量传递
             self.signal.emit(self.orderflow)
             # self.main_win.update_orderflow(self.orderflow)
-
+            if self.runbytick == 0:
+                time.sleep(1)
+            
             # 输出当前资产
             print(self.strategy.orderlist.pos)
             print(self.strategy.orderlist.capital + self.strategy.orderlist.pos * nowtick[20])
@@ -179,7 +186,11 @@ class BackTestManager(QThread):
             pretick = nowtick
             self.buydic = self.tobuydic(pretick)
             self.selldic = self.toselldic(pretick)
+            self.index += 1
             print()
+
+            if self.runbytick:
+                break
     
     def refresh(self, orderflow):
         self.main_win.update_orderflow(orderflow)

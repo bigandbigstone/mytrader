@@ -9,7 +9,8 @@ class BackTestTemplate(object):
     
     # 上一成交价格，这个咋整？
     # 这个都只能在成交后在说
-
+    # Offset 0为开仓，1位平仓
+    # Type 0为买单，1位卖单
     
     orderlist = OrderList()
 
@@ -37,7 +38,7 @@ class BackTestTemplate(object):
         """
         Send buy order to open a long position.
         """
-        self.orderlist.addorder("开仓", 0, price, volume, stop, self.getheight(price))
+        self.orderlist.addorder(0, 0, price, volume, stop, self.getheight(price))
         print(1)
 
     def sell(
@@ -49,7 +50,7 @@ class BackTestTemplate(object):
         """
         Send sell order to close a long position.
         """
-        self.orderlist.addorder("平仓", 1, price, volume, stop, self.getheight(price))
+        self.orderlist.addorder(1, 1, price, volume, stop, self.getheight(price))
         print(2)
 
     def short(
@@ -61,7 +62,7 @@ class BackTestTemplate(object):
         """
         Send short order to open as short position.
         """
-        self.orderlist.addorder("开仓", 1, price, volume, stop, self.getheight(price))
+        self.orderlist.addorder(0, 1, price, volume, stop, self.getheight(price))
         print(3)
 
     def cover(
@@ -73,7 +74,7 @@ class BackTestTemplate(object):
         """
         Send cover order to close a short position.
         """
-        self.orderlist.addorder("平仓", 0, price, volume, stop, self.getheight(price))
+        self.orderlist.addorder(1, 0, price, volume, stop, self.getheight(price))
         if stop:
             print(4)
         else:
