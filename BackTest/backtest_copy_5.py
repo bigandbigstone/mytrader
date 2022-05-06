@@ -1,4 +1,5 @@
 # 回测备份版本5
+from datetime import datetime
 from signal import signal
 import time
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -9,7 +10,9 @@ class BackTestManager(QThread):
     # 即历史订单尾+新增或取消的订单修正（乘0.5加在历史订单尾）（与策略订单同周期的）
     # 下一tick级进行撮合判断，在撮合范围则订单成交，非撮合范围则降低策略订单到成交面的高度，降低的距离为撮合量（成交）
     
-    signal = pyqtSignal(list)
+    signal1 = pyqtSignal(list)
+    signal2 = pyqtSignal(list)
+    signal3 = pyqtSignal(list)
     
     def __init__(self, *args, **kwargs):
         super(BackTestManager, self).__init__()
@@ -18,7 +21,9 @@ class BackTestManager(QThread):
         self.strategy = TickOneStrategy()
         self.orderflow = list()
 
-        self.signal.connect(self.refresh)
+        self.signal1.connect(self.refresh1)
+        self.signal2.connect(self.refresh2)
+        self.signal3.connect(self.refresh3)
         self.main_win = kwargs.get('main_win')
 
         self.runbytick = 0
@@ -172,11 +177,15 @@ class BackTestManager(QThread):
             # 步骤6 本轮策略进行，因为有用于订单成交判定的成交高度修正，所以要放在最后
             self.strategy.on_tick(pretick)
 
+            # 获得当前tick策略订单
+            orderlist = self.strategy.orderlist.getorderlist()
             # 信号量传递
-            self.signal.emit(self.orderflow)
+            self.signal1.emit(self.orderflow)
+            self.signal2.emit(orderlist)
+            self.signal3.emit(pretick[:-2])
             # self.main_win.update_orderflow(self.orderflow)
-            if self.runbytick == 0:
-                time.sleep(1)
+            # if self.runbytick == 0:
+            #    time.sleep(1)
             
             # 输出当前资产
             print(self.strategy.orderlist.pos)
@@ -192,8 +201,14 @@ class BackTestManager(QThread):
             if self.runbytick:
                 break
     
-    def refresh(self, orderflow):
+    def refresh1(self, orderflow):
         self.main_win.update_orderflow(orderflow)
+
+    def refresh2(self, orderlist):
+        self.main_win.update_orderlist(orderlist)
+
+    def refresh3(self, tick):
+        self.main_win.update_histogram(tick)
 
     def tobuydic(self, tick: list) -> dict:
         dic = dict()

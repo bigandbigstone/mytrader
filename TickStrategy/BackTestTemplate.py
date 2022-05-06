@@ -75,10 +75,7 @@ class BackTestTemplate(object):
         Send cover order to close a short position.
         """
         self.orderlist.addorder(1, 0, price, volume, stop, self.getheight(price))
-        if stop:
-            print(4)
-        else:
-            print(5)
+        print(4)
         
 
     def cancel_all(self):

@@ -74,21 +74,33 @@ class Ui_MainWindow(object):
         self.ResetButton.setText(_translate("MainWindow", "重置"))
 
     def update_orderflow(self, orderf):
-        self.model = QtGui.QStandardItemModel()
-        self.model.setHorizontalHeaderLabels(['操作', '方向', '价位', '容量'])
-        self.orderflow.setModel(self.model)
+        self.model1 = QtGui.QStandardItemModel()
+        self.model1.setHorizontalHeaderLabels(['操作', '方向', '价位', '容量'])
+        self.orderflow.setModel(self.model1)
         for order in orderf:
             item1 = QtGui.QStandardItem(order[0])
             item2 = QtGui.QStandardItem(order[1])
             item3 = QtGui.QStandardItem(str(order[2]))
             item4 = QtGui.QStandardItem(str(order[3]))
-            self.model.appendRow([item1,item2,item3,item4])
+            self.model1.appendRow([item1,item2,item3,item4])
         self.orderflow.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         # time.sleep(0.5)
         # pass
 
-    def update_orderlist(self):
-        pass
+    def update_orderlist(self, orderl):
+        self.model2 = QtGui.QStandardItemModel()
+        self.model2.setHorizontalHeaderLabels(['订单号', '开平', '类型', '价位', '订单容量', '成交高度'])
+        self.orderlist.setModel(self.model2)
+        for order in orderl:
+            item1 = QtGui.QStandardItem(str(order[0]))
+            item2 = QtGui.QStandardItem('开仓' if order[1] == 0 else '平仓')
+            item3 = QtGui.QStandardItem('买单' if order[2] == 0 else '卖单')
+            item4 = QtGui.QStandardItem(str(order[3]))
+            item5 = QtGui.QStandardItem(str(order[4]))
+            item6 = QtGui.QStandardItem(str(order[5]))
+            self.model2.appendRow([item1,item2,item3,item4,item5,item6])
+        self.orderlist.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        # pass
 
     def update_strategy(self):
         pass

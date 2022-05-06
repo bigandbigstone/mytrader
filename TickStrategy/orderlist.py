@@ -19,6 +19,7 @@ class OrderList(object):
         self.pos = 0
         self.capital = 0
         self.posprice = 474.0
+        self.sqls = list()
         self.db = pymysql.connect(host='localhost',
                         user='root',
                         password='songlinshuo',
@@ -264,9 +265,9 @@ class OrderList(object):
         # self.connectdb()
         cursor = self.db.cursor()
         
-        # 截断清空，truncate table tbl_name
-        cursor.execute("TRUNCATE TABLE limitlist")
-        cursor.execute("TRUNCATE TABLE stoplist")
+        # 清空表项
+        cursor.execute("DELETE FROM limitlist")
+        cursor.execute("DELETE FROM stoplist")
 
         cursor.close()
         # self.closedb()
@@ -282,6 +283,7 @@ class OrderList(object):
         orders = cursor.fetchall()
         orderl.extend(orders)
 
+        """
         # " "表空
         sql = '''
         SELECT SID, Offset, Type, Price, Volume, ' ' FROM stoplist
@@ -289,6 +291,6 @@ class OrderList(object):
         cursor.execute(sql)
         orders = cursor.fetchall()
         orderl.extend(orders)
-
+        """
         cursor.close()
         return orderl
