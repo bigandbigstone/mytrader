@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtChart import QChart, QChartView, QBarSet, QPercentBarSeries, QBarCategoryAxis
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -27,7 +27,7 @@ class Ui_MainWindow(object):
         self.orderlist.setGeometry(QtCore.QRect(20, 360, 256, 331))
         self.orderlist.setObjectName("orderlist")
 
-        self.histogram = QtWidgets.QGraphicsView(self.centralwidget)
+        self.histogram = QChart()
         self.histogram.setGeometry(QtCore.QRect(310, 190, 731, 501))
         self.histogram.setObjectName("histogram")
 
