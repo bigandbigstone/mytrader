@@ -73,7 +73,8 @@ class TickOneStrategy(BackTestTemplate):
         # tick.pre_close 修改为 tick[21]
         currentTime = datetime.now().time()
         # 平当日仓位, 如果当前时间是结束前日盘15点28分钟,或者夜盘10点58分钟，如果有持仓，平仓。
-        if ((currentTime >= self.DAY_START and currentTime <= self.DAY_END) or
+        if (True or
+            (currentTime >= self.DAY_START and currentTime <= self.DAY_END) or
             (currentTime >= self.NIGHT_START and currentTime <= self.NIGHT_END)):
 
             TA = self.tickArray
