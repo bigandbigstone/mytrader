@@ -64,6 +64,7 @@ class TickOneStrategy(BackTestTemplate):
     def __init__(self):
         #创建Array队列，而Orderlist队交给BackTestTemplate实现
         self.tickArray = TickArrayManager(self.Ticksize)
+        self.pos0count = 0
 
     # ----------------------------------------------------------------------
     def on_tick(self, tick: list):
@@ -85,8 +86,15 @@ class TickOneStrategy(BackTestTemplate):
             self.posPrice = self.orderlist.posprice
             askBidVolumeDif = TA.askBidVolumeDif()
 
+            
+
             if self.pos == 0:
                 # 如果空仓，分析过去10个对比，ask卖方多下空单，bid买方多下多单，并下两个差价阻止单用于止损
+                self.pos0count += 1
+                if self.pos0count >= 10:
+                    self.cancel_all()
+                    self.pos0count = 0
+
                 if askBidVolumeDif > 0:
                     self.short(tick[20], self.fixedSize, False)
                     self.cover(tick[20] + self.stopd * self.d,self.fixedSize, True)
@@ -95,6 +103,7 @@ class TickOneStrategy(BackTestTemplate):
                     self.sell(tick[20] - self.stopd * self.d, self.fixedSize, True)
                     
             elif self.pos > 0:
+                self.pos0count = 0
                 # 如果持有多单，如果已经是买入价格正向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果持有，清掉之前阻止单，改挂当前价位反向2个点阻止单。
                 if  tick[20] - self.posPrice >= self.wind * self.d:
                     if TA.askBidVolumeDif < 0:
@@ -105,6 +114,7 @@ class TickOneStrategy(BackTestTemplate):
                         self.sell(tick[20], abs(self.pos), False)
   
             elif self.pos < 0:
+                self.pos0count = 0
                 # 如果持有空单，如果已经是买入价格反向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果符合，清掉之前阻止单，改挂当前价位反向2个点阻止单。
                 if  tick[20] - self.posPrice <= -1 * self.wind * self.d:
                     if askBidVolumeDif > 0:
