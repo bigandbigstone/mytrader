@@ -106,8 +106,23 @@ class Ui_MainWindow(object):
         self.orderlist.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         # pass
 
-    def update_strategy(self):
-        pass
+    def update_strategy(self, evaluation):
+        # ["合约名称" ,self.evaluater.cm, self.evaluater.capital,
+        # self.evaluater.drawdown, self.evaluater.MAXDrawDown,
+        # self.evaluater.MAXcapital, self.evaluater.MINcapital]
+        self.model3 = QtGui.QStandardItemModel()
+        self.model3.setHorizontalHeaderLabels(['合约名称', '合约系数', '用户净资产', '当前回撤', '最大回撤', '用户最高净资产', '用户最低净资产'])
+        self.strategy.setModel(self.model3)
+
+        item1 = QtGui.QStandardItem(evaluation[0])
+        item2 = QtGui.QStandardItem(str(evaluation[1]))
+        item3 = QtGui.QStandardItem(str(evaluation[2]))
+        item4 = QtGui.QStandardItem(str(evaluation[3]))
+        item5 = QtGui.QStandardItem(str(evaluation[4]))
+        item6 = QtGui.QStandardItem(str(evaluation[5]))
+        item7 = QtGui.QStandardItem(str(evaluation[6]))
+        self.model3.appendRow([item1,item2,item3,item4,item5,item6,item7])
+        self.strategy.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
 
     def update_histogram(self, tick):
         barSet0 = QBarSet('历史订单')

@@ -16,6 +16,8 @@ class OrderList(object):
         self.orderdic = dict()
         # 系统启动修正订单
         self.add_proportion = 0.5
+        # 交易手续费0.006%
+        self.Service_Charge = 1 + 0.00006
         self.pos = 0
         self.capital = 0
         self.posprice = 474.0
@@ -174,11 +176,11 @@ class OrderList(object):
                             # 成交部分已经实现
                             if type == "买单":
                                 self.pos += OrderVol
-                                self.capital -= OrderVol * price
+                                self.capital -= OrderVol * price * self.Service_Charge
                                 print("买入" + str(price) + " " + str(OrderVol))
                             else:
                                 self.pos -= OrderVol
-                                self.capital += OrderVol * price
+                                self.capital += OrderVol * price * self.Service_Charge
                                 print("卖出" + str(price) + " " + str(OrderVol))
 
                             # 更新成交价格
@@ -217,7 +219,7 @@ class OrderList(object):
                 try:
                     cursor.execute(sql, SID)
                     self.pos += OrderVol
-                    self.capital -= OrderVol * price
+                    self.capital -= OrderVol * price * self.Service_Charge
                     # 更新成交价格
                     self.posprice = price
                     print("买入" + str(price) + " " + str(OrderVol))
@@ -247,7 +249,7 @@ class OrderList(object):
                 try:
                     cursor.execute(sql, SID)
                     self.pos -= OrderVol
-                    self.capital += OrderVol * price
+                    self.capital += OrderVol * price * self.Service_Charge
                     # 更新成交价格
                     self.posprice = price
                     print("卖出" + str(price) + " " + str(OrderVol))

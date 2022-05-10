@@ -2,6 +2,7 @@
 from datetime import datetime
 from signal import signal
 import time
+from BackTest.evaluation import Evaluater
 from PyQt5.QtCore import QThread, pyqtSignal
 from TickDataManager.tickdatamanager import TickDataManager
 from TickStrategy.backtest_tick_one_strategy import TickOneStrategy
@@ -13,17 +14,21 @@ class BackTestManager(QThread):
     signal1 = pyqtSignal(list)
     signal2 = pyqtSignal(list)
     signal3 = pyqtSignal(list)
+    signal4 = pyqtSignal(list)
     
     def __init__(self, *args, **kwargs):
         super(BackTestManager, self).__init__()
         self.dbmanager = TickDataManager()
         self.ticks = self.dbmanager.getdatabyorder()
         self.strategy = TickOneStrategy()
+        self.evaluater = Evaluater()
         self.orderflow = list()
+
 
         self.signal1.connect(self.refresh1)
         self.signal2.connect(self.refresh2)
         self.signal3.connect(self.refresh3)
+        self.signal4.connect(self.refresh4)
         self.main_win = kwargs.get('main_win')
 
         self.runbytick = 0
@@ -154,6 +159,7 @@ class BackTestManager(QThread):
         self.buydic = self.tobuydic(pretick)
         self.selldic = self.toselldic(pretick)
         while self.index + 1 < self.n:
+            print(self.index)
 
             # 步骤0 预处理0 nowtick更新
             nowtick = self.ticks[self.index + 1]
@@ -176,6 +182,9 @@ class BackTestManager(QThread):
 
             # 步骤6 本轮策略进行，因为有用于订单成交判定的成交高度修正，所以要放在最后
             self.strategy.on_tick(pretick)
+            
+            # # 步骤7 资金输入，策略评估
+            self.evaluater.update_evaluation(self.strategy.orderlist.capital + self.strategy.orderlist.pos * nowtick[20])
 
             # 获得当前tick策略订单
             orderlist = self.strategy.orderlist.getorderlist()
@@ -183,9 +192,12 @@ class BackTestManager(QThread):
             self.signal1.emit(self.orderflow)
             self.signal2.emit(orderlist)
             self.signal3.emit(list(pretick[:-2]))
+            self.signal4.emit(["合约名称" ,self.evaluater.cm, self.evaluater.capital,
+                self.evaluater.drawdown, self.evaluater.MAXDrawDown,
+                self.evaluater.MAXcapital, self.evaluater.MINcapital])
             # self.main_win.update_orderflow(self.orderflow)
-            if self.runbytick == 0:
-                time.sleep(1)
+            # if self.runbytick == 0:
+            #    time.sleep(1)
             
             # 输出当前资产
             print(self.strategy.orderlist.pos)
@@ -209,6 +221,9 @@ class BackTestManager(QThread):
 
     def refresh3(self, tick):
         self.main_win.update_histogram(tick)
+    
+    def refresh4(self, evaluation):
+        self.main_win.update_strategy(evaluation)
 
     def tobuydic(self, tick: list) -> dict:
         dic = dict()
