@@ -106,7 +106,7 @@ class TickOneStrategy(BackTestTemplate):
                 self.pos0count = 0
                 # 如果持有多单，如果已经是买入价格正向N3个点，再次判断趋势，如果已经不符合，市价卖出。如果持有，清掉之前阻止单，改挂当前价位反向2个点阻止单。
                 if  tick[20] - self.posPrice >= self.wind * self.d:
-                    if TA.askBidVolumeDif < 0:
+                    if askBidVolumeDif < 0:
                         self.cancel_all()
                         self.sell(tick[20] - self.stopd * self.d, abs(self.pos), True)
                     else:
