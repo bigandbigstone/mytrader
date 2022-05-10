@@ -50,7 +50,7 @@ class TickOneStrategy(BackTestTemplate):
   
     # 主义修改
     DAY_START = time(9, 00)  # 日盘启动和停止时间
-    DAY_END = time(20, 59)
+    DAY_END = time(14, 58)
     NIGHT_START = time(21, 00)  # 夜盘启动和停止时间
     NIGHT_END = time(10, 58)
 
