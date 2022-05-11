@@ -189,15 +189,15 @@ class BackTestManager(QThread):
             # 获得当前tick策略订单
             orderlist = self.strategy.orderlist.getorderlist()
             # 信号量传递
-            #self.signal1.emit(self.orderflow)
-            #self.signal2.emit(orderlist)
-            #self.signal3.emit(list(pretick[:-2]))
+            self.signal1.emit(self.orderflow)
+            self.signal2.emit(orderlist)
+            self.signal3.emit(list(pretick[:-2]))
             self.signal4.emit(["合约名称" ,self.evaluater.cm, self.evaluater.capital,
                 self.evaluater.drawdown, self.evaluater.MAXDrawDown,
                 self.evaluater.MAXcapital, self.evaluater.MINcapital])
             # self.main_win.update_orderflow(self.orderflow)
-            # if self.runbytick == 0:
-            #    time.sleep(1)
+            if self.runbytick == 0:
+                time.sleep(1)
             
             # 输出当前资产
             print(self.strategy.orderlist.pos)
