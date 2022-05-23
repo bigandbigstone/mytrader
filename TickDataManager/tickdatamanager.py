@@ -1,4 +1,5 @@
-# 同步tickdb
+# 数据接口 同步版
+# 作者 SongLinshuo
 import datetime
 from unittest import result
 import pymysql

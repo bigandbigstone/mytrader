@@ -1,4 +1,5 @@
-# 图形界面使用
+# 订单簿类，最终未使用
+# 作者 SongLinshuo
 from collections import deque
 import TickDataManager.tickdatamanager as tdm
 class OrdersBook(object):

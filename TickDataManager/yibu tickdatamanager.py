@@ -1,4 +1,5 @@
-# 异步tickdb
+# 数据接口 异步版
+# 作者 SongLinshuo
 import asyncio
 import datetime
 import aiomysql

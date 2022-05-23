@@ -1,4 +1,5 @@
-# orderlist用于维护策略订单
+# orderlist用于维护策略订单队列
+# 作者 SongLinshuo
 from pygments import highlight
 import pymysql
 # 完全实现，OK！

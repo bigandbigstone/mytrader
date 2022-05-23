@@ -1,4 +1,5 @@
-# 回测备份版本5
+# 回测模块备份版本5 图形界面终版
+# 作者 SongLinshuo
 from datetime import datetime
 from signal import signal
 import time

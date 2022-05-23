@@ -1,5 +1,5 @@
-# 回测备份版本4
-import datetime
+# 回测模块备份版本4 无图形界面终版
+# 作者 SongLinshuo
 from TickDataManager.tickdatamanager import TickDataManager
 from TickStrategy.backtest_tick_one_strategy import TickOneStrategy
 

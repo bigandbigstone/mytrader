@@ -1,6 +1,8 @@
+# 图形界面高频回测系统主程序
+# 作者 SongLinshuo
 import sys
 from PyQt5 import QtWidgets
-from BackTestGUI.Ui_Mainwindow_1 import MyWindow
+from BackTestGUI.Ui_Mainwindow import MyWindow
 import qdarkstyle
 from qdarkstyle.light.palette import LightPalette
 

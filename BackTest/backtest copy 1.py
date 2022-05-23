@@ -1,4 +1,5 @@
-# 回测备份版本1
+# 回测模块备份版本1
+# 作者 SongLinshuo
 import TickDataManager.tickdatamanager as tdm
 class BackTestManager(object):
     def __init__(self):

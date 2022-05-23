@@ -1,9 +1,10 @@
+# 高频客制vntrader
+# 作者 SongLinshuo
+
 # flake8: noqa
 from vnpy.event import EventEngine
-
 from vnpy.trader.engine import MainEngine
 from vnpy.trader.ui import MainWindow, create_qapp
-
 from vnpy_ctp import CtpGateway
 # from vnpy_ctptest import CtptestGateway
 # from vnpy_mini import MiniGateway
@@ -25,7 +26,7 @@ from vnpy_ctp import CtpGateway
 # from vnpy_hft import GtjaGateway
 
 from vnpy_ctastrategy import CtaStrategyApp
-from vnpy_ctabacktester import CtaBacktesterApp
+# from vnpy_ctabacktester import CtaBacktesterApp
 # from vnpy_spreadtrading import SpreadTradingApp
 # from vnpy_algotrading import AlgoTradingApp
 # from vnpy_optionmaster import OptionMasterApp
@@ -41,6 +42,8 @@ from vnpy_ctabacktester import CtaBacktesterApp
 # from vnpy_portfoliomanager import PortfolioManagerApp
 # from vnpy_paperaccount import PaperAccountApp
 
+import qdarkstyle
+from qdarkstyle.light.palette import LightPalette
 
 def main():
     """"""
@@ -74,7 +77,7 @@ def main():
 
     # main_engine.add_app(PaperAccountApp)
     main_engine.add_app(CtaStrategyApp)
-    main_engine.add_app(CtaBacktesterApp)
+    # main_engine.add_app(CtaBacktesterApp)
     # main_engine.add_app(SpreadTradingApp)
     # main_engine.add_app(AlgoTradingApp)
     # main_engine.add_app(OptionMasterApp)
@@ -89,6 +92,7 @@ def main():
     # main_engine.add_app(WebTraderApp)
     # main_engine.add_app(PortfolioManagerApp)
     
+    qapp.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5', palette=LightPalette()))
     main_window = MainWindow(main_engine, event_engine)
     main_window.showMaximized()
 

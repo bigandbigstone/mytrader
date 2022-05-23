@@ -1,4 +1,6 @@
-# TickOneStrategy for BackTest
+# tickone策略 for 回测
+# 作者 SongLinshuo
+
 from datetime import datetime, time
 from TickStrategy.BackTestTemplate import BackTestTemplate
 import numpy as np

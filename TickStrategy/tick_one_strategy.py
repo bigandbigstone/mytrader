@@ -1,4 +1,5 @@
 # 供vnpy装载的TickOneStrategy
+# 作者 SongLinshuo
 from datetime import datetime, time
 from pydoc import classname
 import numpy as np

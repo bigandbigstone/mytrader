@@ -1,4 +1,5 @@
-# 回测备份版本3
+# 回测模块备份版本3
+# 作者 SongLinshuo
 import TickDataManager.tickdatamanager as tdm
 class BackTestManager(object):
     # 回测思路，由生成的交易指令确定下单策略订单到成交面的高度

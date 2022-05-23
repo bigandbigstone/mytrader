@@ -1,4 +1,5 @@
 # 回测策略指标评估器
+# 作者 SongLinshuo
 class Evaluater(object):
     # 计算年化收益率
     # 最大回撤

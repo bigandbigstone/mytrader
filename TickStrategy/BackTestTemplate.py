@@ -1,4 +1,5 @@
 # BackTest策略基类
+# 作者 SongLinshuo
 from TickStrategy.orderlist import OrderList
 
 class BackTestTemplate(object):
