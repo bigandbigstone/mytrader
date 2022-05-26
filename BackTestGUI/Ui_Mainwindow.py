@@ -112,6 +112,9 @@ class Ui_MainWindow(object):
         # ["合约名称" ,self.evaluater.cm, self.evaluater.capital,
         # self.evaluater.drawdown, self.evaluater.MAXDrawDown,
         # self.evaluater.MAXcapital, self.evaluater.MINcapital]
+        if len(evaluation) == 0:
+            evaluation = [0 for _ in range(7)]
+
         self.model3 = QtGui.QStandardItemModel()
         self.model3.setHorizontalHeaderLabels(['合约名称', '合约系数', '用户净资产', '当前回撤', '最大回撤', '用户最高净资产', '用户最低净资产'])
         self.strategy.setModel(self.model3)
@@ -192,6 +195,10 @@ class Ui_MainWindow(object):
                 self.p.terminate()
                 self.p.quit()
             self.p.index = 0
+            self.update_histogram([])
+            self.update_orderflow([])
+            self.update_orderlist([])
+            self.update_strategy([])
 
 class MyWindow(QtWidgets.QMainWindow,Ui_MainWindow):
   def __init__(self):
